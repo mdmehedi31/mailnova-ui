@@ -1,0 +1,810 @@
+
+
+
+/* =========================================================================
+   MailNova theme
+   A single, shared stylesheet used by every view in the application:
+   - MainLayout (top navbar)
+   - CompanyListView (Companies list + read-only profile preview)
+   - CompanyProfileEditView (Company Profile edit form)
+   ========================================================================= */
+
+/* Universal box-sizing reset so padding/borders never blow out widths
+   we've explicitly set (this was a contributor to the horizontal
+   overflow / overlapping panels reported during testing). */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    --mn-bg: #F5F6FA;
+    --mn-card-bg: #FFFFFF;
+    --mn-border: #E7E8F0;
+    --mn-text-primary: #111827;
+    --mn-text-secondary: #6B7280;
+    --mn-text-muted: #9CA3AF;
+
+    --mn-primary: #4F46E5;
+    --mn-primary-dark: #4338CA;
+    --mn-primary-light: #EEF0FD;
+
+    --mn-success-bg: #DCFCE7;
+    --mn-success-text: #16A34A;
+    --mn-neutral-bg: #F1F5F9;
+    --mn-neutral-text: #64748B;
+
+    --mn-radius-lg: 16px;
+    --mn-radius-md: 12px;
+    --mn-radius-sm: 8px;
+    --mn-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+
+    --lumo-font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --lumo-primary-color: var(--mn-primary);
+    --lumo-primary-text-color: var(--mn-primary);
+    --lumo-base-color: var(--mn-card-bg);
+    --lumo-body-text-color: var(--mn-text-primary);
+    --lumo-secondary-text-color: var(--mn-text-secondary);
+
+    background-color: var(--mn-bg);
+}
+
+body {
+    background-color: var(--mn-bg);
+}
+
+/* -------------------------------------------------------------------- */
+/* Top navbar (MainLayout)                                              */
+/* -------------------------------------------------------------------- */
+
+.mn-shell::part(navbar) {
+    background: var(--mn-card-bg);
+    border-bottom: 1px solid var(--mn-border);
+    box-shadow: none;
+}
+
+.mn-header {
+    padding: 0.75rem 2rem;
+}
+
+.mn-logo {
+    gap: 0.6rem;
+}
+
+.mn-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #6366F1, #4338CA);
+    color: white;
+}
+
+.mn-logo-icon vaadin-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.mn-logo-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-actions {
+    gap: 1.25rem;
+}
+
+.mn-bell-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.mn-bell-button {
+    color: var(--mn-text-secondary);
+}
+
+.mn-notification-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #EF4444;
+    border: 2px solid var(--mn-card-bg);
+    pointer-events: none;
+}
+
+.mn-user-menu {
+    cursor: pointer;
+    padding: 0.25rem 0.4rem;
+    border-radius: var(--mn-radius-sm);
+    gap: 0.5rem;
+}
+
+.mn-user-menu:hover {
+    background: var(--mn-bg);
+}
+
+.mn-user-avatar {
+    --vaadin-avatar-background: var(--mn-primary-light);
+    --vaadin-avatar-color: var(--mn-primary);
+    font-weight: 600;
+}
+
+.mn-user-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--mn-text-primary);
+}
+
+.mn-user-chevron {
+    width: 0.9rem;
+    height: 0.9rem;
+    color: var(--mn-text-muted);
+}
+
+/* -------------------------------------------------------------------- */
+/* Generic page / card primitives                                       */
+/* -------------------------------------------------------------------- */
+
+.mn-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 1.5rem;
+    padding: 1.75rem 2rem 3rem 2rem;
+}
+
+.mn-page-header,
+.mn-edit-page-header {
+    margin-bottom: 1.5rem;
+}
+
+.mn-page-title {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+    margin: 0;
+}
+
+.mn-page-description {
+    color: var(--mn-text-secondary);
+    font-size: 0.95rem;
+    margin: 0.3rem 0 0 0;
+    max-width: 620px;
+}
+
+.mn-page-title-block {
+    gap: 0.2rem;
+}
+
+.mn-primary-button {
+    background: var(--mn-primary);
+    border-radius: var(--mn-radius-sm);
+    font-weight: 600;
+}
+
+.mn-secondary-button {
+    background: var(--mn-card-bg);
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-sm);
+    color: var(--mn-text-primary);
+    font-weight: 600;
+}
+
+.mn-icon-only-button {
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-sm);
+    color: var(--mn-text-secondary);
+}
+
+.mn-card {
+    background: var(--mn-card-bg);
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-lg);
+    box-shadow: var(--mn-shadow);
+    padding: 1.5rem;
+    box-sizing: border-box;
+}
+
+.mn-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+    margin: 0;
+}
+
+.mn-card-subtitle {
+    color: var(--mn-text-secondary);
+    font-size: 0.88rem;
+    margin: 0.2rem 0 1.25rem 0;
+}
+
+.mn-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.mn-badge-active {
+    background: var(--mn-success-bg);
+    color: var(--mn-success-text);
+}
+
+.mn-badge-inactive {
+    background: var(--mn-neutral-bg);
+    color: var(--mn-neutral-text);
+}
+
+.mn-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--mn-radius-sm);
+    color: white;
+    flex: none;
+}
+
+.mn-avatar vaadin-icon {
+    color: white;
+}
+
+/* -------------------------------------------------------------------- */
+/* Companies list view                                                  */
+/* -------------------------------------------------------------------- */
+
+.mn-companies-body {
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.mn-list-panel {
+    width: 340px;
+    flex: none;
+    background: var(--mn-card-bg);
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-lg);
+    box-shadow: var(--mn-shadow);
+    padding: 1.25rem;
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+.mn-search-wrapper {
+    width: 100%;
+}
+
+.mn-search-field {
+    --lumo-text-field-size: 2.3rem;
+}
+
+.mn-list-items {
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.mn-list-item-wrapper {
+    width: 100%;
+    cursor: pointer;
+}
+
+.mn-list-item {
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--mn-radius-md);
+    border: 1px solid transparent;
+    gap: 0.75rem;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.mn-list-item:hover {
+    background: var(--mn-bg);
+}
+
+.mn-list-item-selected {
+    background: var(--mn-primary-light);
+    border-color: #C7D2FE;
+}
+
+.mn-list-avatar {
+    width: 2.4rem;
+    height: 2.4rem;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border-radius: 10px;
+}
+
+.mn-list-avatar vaadin-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.mn-list-item-text {
+    gap: 0.05rem;
+    overflow: hidden;
+}
+
+.mn-list-item-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--mn-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mn-list-item-email {
+    font-size: 0.8rem;
+    color: var(--mn-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mn-list-item-meta {
+    flex: none;
+}
+
+.mn-list-item-chevron {
+    width: 0.9rem;
+    height: 0.9rem;
+    color: var(--mn-text-muted);
+}
+
+.mn-info-banner {
+    width: 100%;
+    background: var(--mn-primary-light);
+    border-radius: var(--mn-radius-md);
+    padding: 0.85rem 1rem;
+    box-sizing: border-box;
+}
+
+.mn-info-banner-content {
+    gap: 0.6rem;
+}
+
+.mn-info-icon {
+    color: var(--mn-primary);
+    margin-top: 0.15rem;
+    flex: none;
+}
+
+.mn-info-headline {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--mn-primary-dark);
+}
+
+.mn-info-body {
+    display: block;
+    font-size: 0.8rem;
+    color: #4B5299;
+    margin-top: 0.1rem;
+}
+
+.mn-detail-panel {
+    flex: 1 1 auto;
+    gap: 1.25rem;
+    min-width: 0;
+}
+
+.mn-detail-header-card {
+    padding: 1.1rem 1.5rem;
+}
+
+.mn-detail-header-row {
+    gap: 1rem;
+}
+
+.mn-detail-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--mn-radius-md);
+}
+
+.mn-detail-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-detail-subtitle {
+    color: var(--mn-text-secondary);
+    font-size: 0.88rem;
+}
+
+.mn-tabs {
+    border-bottom: 1px solid var(--mn-border);
+}
+
+.mn-tabs-wrapper {
+    gap: 1.25rem;
+}
+
+.mn-placeholder-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+}
+
+.mn-placeholder-text {
+    color: var(--mn-text-muted);
+}
+
+.mn-profile-tab-content {
+    width: 100%;
+}
+
+.mn-profile-columns {
+    gap: 1.25rem;
+    align-items: flex-start;
+}
+
+.mn-profile-left-column {
+    gap: 1.25rem;
+    min-width: 0;
+}
+
+.mn-info-rows {
+    gap: 0;
+}
+
+.mn-info-row {
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--mn-border);
+}
+
+.mn-info-row:last-child {
+    border-bottom: none;
+}
+
+.mn-info-row-label {
+    width: 190px;
+    flex: none;
+    color: var(--mn-text-secondary);
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.mn-info-row-value {
+    color: var(--mn-text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.mn-logo-card {
+    padding-bottom: 1.75rem;
+}
+
+.mn-logo-preview-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px dashed var(--mn-border);
+    border-radius: var(--mn-radius-md);
+    background: var(--mn-bg);
+}
+
+.mn-logo-preview-avatar {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 8px;
+}
+
+.mn-logo-preview-name {
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+/* -------------------------------------------------------------------- */
+/* Preview card (shared between list view + edit view)                  */
+/* -------------------------------------------------------------------- */
+
+.mn-preview-card {
+    /* Sizing (flex-grow/shrink/basis, width) is set inline from Java for this
+       element so it always wins the cascade — do not redeclare flex/width here,
+       it will fight the inline style. */
+    align-self: flex-start;
+}
+
+.mn-preview-email-card {
+    background: var(--mn-bg);
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-md);
+    padding: 1.25rem;
+}
+
+.mn-preview-brand-row {
+    padding-bottom: 0.85rem;
+}
+
+.mn-preview-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 7px;
+    color: white;
+    margin-right: 0.5rem;
+}
+
+.mn-preview-logo-icon vaadin-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: white;
+}
+
+.mn-preview-logo-name {
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-preview-tagline {
+    font-size: 0.72rem;
+    color: var(--mn-text-muted);
+}
+
+.mn-preview-hello {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0.75rem 0 0.35rem 0;
+    color: var(--mn-text-primary);
+}
+
+.mn-preview-body {
+    font-size: 0.88rem;
+    color: var(--mn-text-secondary);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.5;
+}
+
+.mn-preview-divider {
+    margin: 0.5rem 0 1rem 0;
+    border: none;
+    border-top: 1px solid var(--mn-border);
+}
+
+.mn-preview-meta-list {
+    gap: 0.55rem;
+}
+
+.mn-preview-meta-row {
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--mn-text-primary);
+}
+
+.mn-preview-meta-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    color: var(--mn-text-muted);
+    margin-top: 0.15rem;
+    flex: none;
+}
+
+.mn-preview-link {
+    color: var(--mn-primary);
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.mn-preview-link:hover {
+    text-decoration: underline;
+}
+
+.mn-preview-footer {
+    display: block;
+    text-align: center;
+    margin-top: 1.25rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--mn-border);
+    font-size: 0.72rem;
+    color: var(--mn-text-muted);
+}
+
+/* -------------------------------------------------------------------- */
+/* Edit view (Company Profile)                                          */
+/* -------------------------------------------------------------------- */
+
+.mn-page-title-row {
+    gap: 0.85rem;
+}
+
+.mn-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: var(--mn-radius-sm);
+    background: var(--mn-primary-light);
+    color: var(--mn-primary);
+    flex: none;
+}
+
+.mn-hero-banner {
+    background: linear-gradient(135deg, #EEF0FD, #E0E7FF);
+    border-radius: var(--mn-radius-md);
+    padding: 0.75rem 1.25rem;
+    flex: none;
+    white-space: nowrap;
+}
+
+.mn-banner-icon {
+    color: var(--mn-primary);
+}
+
+.mn-banner-text {
+    color: var(--mn-primary-dark);
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+
+.mn-edit-body {
+    gap: 1.25rem;
+    align-items: flex-start;
+}
+
+.mn-form-card {
+    min-width: 0;
+}
+
+.mn-form-fields {
+    gap: 1.1rem;
+}
+
+.mn-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem;
+    width: 100%;
+}
+
+.mn-field-row > * {
+    min-width: 0;
+    width: 100%;
+}
+
+.mn-required-field::part(label)::after {
+    content: " *";
+    color: #EF4444;
+}
+
+.mn-address-field {
+    --lumo-text-field-size: auto;
+}
+
+.mn-address-field textarea {
+    min-height: 5rem;
+}
+
+.mn-form-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--mn-text-primary);
+    margin: 0 0 0.4rem 0;
+}
+
+.mn-form-field-group {
+    width: 100%;
+}
+
+.mn-logo-upload-row {
+    gap: 0.75rem;
+    align-items: stretch;
+}
+
+.mn-logo-current-box {
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-md);
+    padding: 0.6rem 0.9rem;
+    gap: 0.6rem;
+    flex: none;
+    background: var(--mn-bg);
+}
+
+.mn-logo-current {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 7px;
+}
+
+.mn-logo-current-name {
+    font-weight: 700;
+    color: var(--mn-text-primary);
+    font-size: 0.9rem;
+}
+
+.mn-upload {
+    flex: 1 1 auto;
+    border: 1px dashed var(--mn-border);
+    border-radius: var(--mn-radius-md);
+    background: var(--mn-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.5rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.mn-upload::part(drop-label) {
+    display: none;
+}
+
+.mn-upload-label {
+    gap: 0.15rem;
+}
+
+.mn-upload-icon {
+    color: var(--mn-text-muted);
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.mn-upload-text {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--mn-text-primary);
+}
+
+.mn-upload-hint {
+    font-size: 0.75rem;
+    color: var(--mn-text-muted);
+}
+
+.mn-form-divider {
+    margin: 1.5rem 0 1.25rem 0;
+    border: none;
+    border-top: 1px solid var(--mn-border);
+}
+
+.mn-form-actions {
+    gap: 0.75rem;
+}
+
+/* -------------------------------------------------------------------- */
+/* Responsive                                                            */
+/* -------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+    .mn-companies-body,
+    .mn-edit-body,
+    .mn-profile-columns {
+        flex-direction: column;
+    }
+
+    .mn-list-panel {
+        width: 100%;
+    }
+
+    .mn-preview-card {
+        position: static;
+    }
+}
+
+@media (max-width: 700px) {
+    .mn-field-row {
+        grid-template-columns: 1fr;
+    }
+
+    .mn-edit-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .mn-hero-banner {
+        white-space: normal;
+    }
+}
