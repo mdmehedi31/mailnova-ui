@@ -38,5 +38,9 @@ public class CompanyProfileService {
         return profileCaller.addCompanyProfile(company);
     }
 
+    public CompanyProfileDto update(CompanyProfileDto company) {
+        return profileCaller.updateCompanyProfile(company);
+    }
+
 
 }

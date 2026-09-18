@@ -19,6 +19,8 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -42,6 +44,7 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
     private final ComboBox<String> timezoneField = new ComboBox<>("Time Zone");
 
     private Integer userId =1;
+    private static Logger log = LoggerFactory.getLogger(CompanyProfileEditView.class);
     public CompanyProfileEditView(CompanyProfileService companyService) {
         this.companyService = companyService;
         addClassName("mn-page");
@@ -53,8 +56,17 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String companyId) {
-        List<CompanyProfileDto> all = companyService.findAll(userId);
-        this.company = null;
+
+       // List<CompanyProfileDto> all = companyService.findAll(userId);
+
+        log.info("Company Id is : " + companyId);
+        if(companyId != null) {
+            Integer comId= Integer.parseInt(companyId);
+            this.company = companyService.findById(comId);
+        }else{
+            this.company = new CompanyProfileDto();
+        }
+
 
         removeAll();
         add(buildPageHeader());
@@ -272,7 +284,15 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
     }
 
     private void saveChanges() {
-        companyService.save(company);
+
+        if(company!=null) {
+
+            if(company.getId() ==null){
+                companyService.update(company);
+            }else{
+                companyService.save(company);
+            }
+        }
         Notification notification = Notification.show("Company profile saved.", 3000,
                 Notification.Position.TOP_END);
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);

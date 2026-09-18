@@ -57,7 +57,7 @@ final class CompanyPreviewBuilder {
             logoIcon.add(new Icon(VaadinIcon.ENVELOPE_O));
             logoIcon.getStyle().set("background", colorCode);
 
-            logoName.setText(company.getName().replace(" Ltd.", ""));
+            logoName.setText(company.getName()!=null ? company.getName().replace(" Ltd.", ""):"");
             logoName.addClassName("mn-preview-logo-name");
 
             HorizontalLayout brandRow = new HorizontalLayout(
@@ -115,11 +115,10 @@ final class CompanyPreviewBuilder {
         void update(CompanyProfileDto company) {
            // logoIcon.getStyle().set("background", company.getAvatarColor());
             logoName.setText(company.getName().replace(" Ltd.", ""));
-            nameLine.setText(company.getName());
-            emailLine.setText(company.getFromEmailSendAddress());
-            phoneLine.setText(company.getPhoneNo());
-            addressLine.setText(company.getAddress().replace("\n", ", "));
-            websiteLine.setText(company.getWebsite());
+            emailLine.setText(company.getFromEmailSendAddress()!=null ? company.getFromEmailSendAddress() : "");
+            phoneLine.setText(company.getPhoneNo()!=null ? company.getPhoneNo() : "");
+            addressLine.setText(company.getAddress() !=null? company.getAddress().replace("\n", ", "):null);
+            websiteLine.setText(company.getWebsite()!=null? company.getWebsite():null);
             websiteLine.setHref(company.getWebsite().isBlank() ? "#" : company.getWebsite());
             footerName.setText(LocalDateTime.now().getYear() + company.getName() + " All rights reserved.");
         }

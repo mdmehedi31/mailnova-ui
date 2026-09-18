@@ -21,11 +21,6 @@ import com.vaadin.flow.router.Route;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * "Companies" screen: a searchable list of companies on the left and a
- * read-only preview of the selected company's profile (with a live
- * email preview) on the right. Mirrors the second reference screenshot.
- */
 @Route(value = "companies", layout = MainLayout.class)
 @PageTitle("Companies | MailNova")
 public class CompanyListView extends VerticalLayout {
@@ -45,31 +40,31 @@ public class CompanyListView extends VerticalLayout {
         setPadding(true);
         setSpacing(false);
         setWidthFull();
-        getStyle().set("max-width", "1400px").set("margin", "0 auto").set("box-sizing", "border-box");
+        getStyle().set("max-width", "100%").set("margin", "0 auto").set("box-sizing", "border-box");
 
         add(buildPageHeader());
 
         HorizontalLayout body = new HorizontalLayout();
-        body.addClassName("mn-companies-body");
+       // body.addClassName("mn-companies-body");
+       // detailContainer.getStyle().setMarginTop("-40px");
         body.setWidthFull();
         body.setFlexGrow(0, listContainer);
         body.setFlexGrow(1, detailContainer);
-        // Structural sizing is set inline (in addition to the CSS classes) so it
-        // always wins the cascade, regardless of how Lumo's own layout styles load.
-        body.getStyle().set("align-items", "flex-start").set("gap", "1.5rem");
+        body.getStyle().set("align-items", "flex-start").setMarginTop("-36px");//.set("gap", "1.5rem");
 
         listContainer.addClassName("mn-list-panel");
         listContainer.setPadding(false);
         listContainer.setSpacing(false);
-        listContainer.setWidth("340px");
-        listContainer.getStyle().set("flex", "0 0 340px").set("min-width", "340px");
+        listContainer.setWidth("400px");
+        listContainer.getStyle().set("flex", "0 0 340px").set("min-width", "400px");
 
         detailContainer.addClassName("mn-detail-panel");
         detailContainer.setPadding(false);
         detailContainer.setSpacing(false);
         detailContainer.setWidthFull();
         detailContainer.getStyle().set("flex", "1 1 0").set("min-width", "0");
-
+        detailContainer.addClassName("mn-card");
+        detailContainer.getStyle().setPadding("16px");
         body.add(listContainer, detailContainer);
         add(body);
 
@@ -97,6 +92,9 @@ public class CompanyListView extends VerticalLayout {
         Button addCompany = new Button("Add Company", new Icon(VaadinIcon.PLUS));
         addCompany.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addCompany.addClassName("mn-primary-button");
+
+        addCompany.addClickListener(e -> UI.getCurrent().navigate(
+                CompanyProfileEditView.class));
 
         HorizontalLayout header = new HorizontalLayout(titleBlock, addCompany);
         header.addClassName("mn-page-header");
@@ -156,9 +154,11 @@ public class CompanyListView extends VerticalLayout {
 
         Span name = new Span(company.getName());
         name.addClassName("mn-list-item-name");
+        name.getStyle().setWidth("220px");
 
         Span email = new Span(company.getCompanyEmail());
         email.addClassName("mn-list-item-email");
+        email.getStyle().setWidth("220px");
 
         VerticalLayout textBlock = new VerticalLayout(name, email);
         textBlock.setPadding(false);
@@ -168,8 +168,8 @@ public class CompanyListView extends VerticalLayout {
         // of collapsing to its flex-basis; min-width:0 lets it shrink+ellipsize.
         textBlock.getStyle()
                 .set("flex", "1 1 0")
-                .set("min-width", "0")
-                .set("overflow", "hidden");
+                .set("min-width", "0");
+               // .set("overflow", "hidden");
 
         String status = "Active";
 
@@ -182,16 +182,16 @@ public class CompanyListView extends VerticalLayout {
         Icon chevron = new Icon(VaadinIcon.CHEVRON_RIGHT_SMALL);
         chevron.addClassName("mn-list-item-chevron");
 
-        VerticalLayout metaBlock = new VerticalLayout(badge, chevron);
+        VerticalLayout metaBlock = new VerticalLayout(badge/*, chevron*/);
         metaBlock.setPadding(false);
         metaBlock.setSpacing(true);
         metaBlock.setAlignItems(Alignment.END);
         metaBlock.addClassName("mn-list-item-meta");
+        metaBlock.getStyle().setWidth("auto !important");
         metaBlock.getStyle().set("flex", "0 0 auto");
 
         HorizontalLayout row = new HorizontalLayout(avatar, textBlock, metaBlock);
         row.addClassName("mn-list-item");
-        row.setWidthFull();
         row.setAlignItems(Alignment.CENTER);
         row.getStyle().set("gap", "0.75rem");
         row.setFlexGrow(1, textBlock);
@@ -284,10 +284,10 @@ public class CompanyListView extends VerticalLayout {
         header.setWidthFull();
         header.setAlignItems(Alignment.CENTER);
         header.setJustifyContentMode(JustifyContentMode.BETWEEN);
-
+        header.getStyle().setMarginTop("-30px");
         Div card = new Div(header);
-        card.addClassName("mn-card");
         card.addClassName("mn-detail-header-card");
+        card.setWidthFull();
         return card;
     }
 
@@ -297,6 +297,7 @@ public class CompanyListView extends VerticalLayout {
         Tab brandingTab = new Tab("Branding");
         Tab domainTab = new Tab("Domain & DNS");
         Tabs tabs = new Tabs(profileTab, senderTab, brandingTab, domainTab);
+        tabs.setWidthFull();
         tabs.addClassName("mn-tabs");
 
         Div profilePanel = buildProfileTabContent(company);
@@ -312,7 +313,9 @@ public class CompanyListView extends VerticalLayout {
         VerticalLayout wrapper = new VerticalLayout(tabs, profilePanel, placeholderPanel);
         wrapper.setPadding(false);
         wrapper.setSpacing(false);
+        wrapper.setWidthFull();
         wrapper.addClassName("mn-tabs-wrapper");
+        wrapper.getStyle().setMarginTop("-40px");
         return wrapper;
     }
 
@@ -329,19 +332,19 @@ public class CompanyListView extends VerticalLayout {
         HorizontalLayout columns = new HorizontalLayout();
         columns.addClassName("mn-profile-columns");
         columns.setWidthFull();
-        columns.getStyle().set("align-items", "flex-start").set("gap", "1.25rem");
+        columns.getStyle().set("align-items", "flex-start").set("gap", "0.5rem");
 
-        VerticalLayout leftColumn = new VerticalLayout(buildInfoCard(company), buildLogoCard(company));
+        VerticalLayout leftColumn = new VerticalLayout(buildInfoCard(company)/*, buildLogoCard(company)*/);
         leftColumn.setPadding(false);
         leftColumn.addClassName("mn-profile-left-column");
         leftColumn.getStyle().set("flex", "3 1 0").set("min-width", "0").set("width", "auto");
 
-        Div previewCard = CompanyPreviewBuilder.build(company);
-        previewCard.getStyle().set("flex", "2 1 0").set("min-width", "0").set("width", "auto");
+        //Div previewCard = CompanyPreviewBuilder.build(company);
+        //previewCard.getStyle().set("flex", "2 1 0").set("min-width", "0").set("width", "auto");
 
-        columns.add(leftColumn, previewCard);
+        columns.add(leftColumn/*, previewCard*/);
         columns.setFlexGrow(3, leftColumn);
-        columns.setFlexGrow(2, previewCard);
+      //  columns.setFlexGrow(2, previewCard);
 
         Div wrapper = new Div(columns);
         wrapper.addClassName("mn-profile-tab-content");
@@ -363,10 +366,11 @@ public class CompanyListView extends VerticalLayout {
         rows.add(infoRow("Email Sending Address", company.getFromEmailSendAddress()));
         rows.add(infoRow("Contact Email", company.getContactEmail()!=null?company.getContactEmail():""));
         rows.add(infoRow("Phone Number", company.getPhoneNo()!=null?company.getPhoneNo():""));
-        rows.add(infoRow("Website", company.getWebsite()!=null?company.getWebsite():""));
+        rows.add(infoRow("Website", company.getWebsite()!=null?company.getWebsite():"Not available"));
         rows.add(infoRow("Address", company.getAddress() !=null?company.getAddress().replace("\n", ", "):""));
 
         Div card = new Div(title, subtitle, rows);
+        card.setWidthFull();
         card.addClassName("mn-card");
         return card;
     }
@@ -385,7 +389,7 @@ public class CompanyListView extends VerticalLayout {
         return row;
     }
 
-    private Div buildLogoCard(CompanyProfileDto company) {
+    /*private Div buildLogoCard(CompanyProfileDto company) {
         H3 title = new H3("Company Logo");
         title.addClassName("mn-card-title");
 
@@ -400,7 +404,7 @@ public class CompanyListView extends VerticalLayout {
         card.addClassName("mn-card");
         card.addClassName("mn-logo-card");
         return card;
-    }
+    }*/
 
     static Div buildAvatar(CompanyProfileDto company, String extraClass) {
         Div avatar = new Div();
