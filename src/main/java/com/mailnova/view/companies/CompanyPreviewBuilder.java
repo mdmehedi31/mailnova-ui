@@ -119,7 +119,7 @@ final class CompanyPreviewBuilder {
             phoneLine.setText(company.getPhoneNo()!=null ? company.getPhoneNo() : "");
             addressLine.setText(company.getAddress() !=null? company.getAddress().replace("\n", ", "):null);
             websiteLine.setText(company.getWebsite()!=null? company.getWebsite():null);
-            websiteLine.setHref(company.getWebsite().isBlank() ? "#" : company.getWebsite());
+            websiteLine.setHref(company.getWebsite()!=null && company.getWebsite().isBlank() ? "#" : company.getWebsite());
             footerName.setText(LocalDateTime.now().getYear() + company.getName() + " All rights reserved.");
         }
     }
