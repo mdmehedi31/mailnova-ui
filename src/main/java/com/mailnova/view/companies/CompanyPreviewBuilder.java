@@ -113,13 +113,15 @@ final class CompanyPreviewBuilder {
         }
 
         void update(CompanyProfileDto company) {
-           // logoIcon.getStyle().set("background", company.getAvatarColor());
-            logoName.setText(company.getName().replace(" Ltd.", ""));
-            emailLine.setText(company.getFromEmailSendAddress()!=null ? company.getFromEmailSendAddress() : "");
+            logoIcon.getStyle().set("background", "#4F46E5");
+            logoName.setText(company.getName() !=null? company.getName():"");
+            nameLine.setText(company.getName()!=null ? company.getName():"");
+            emailLine.setText(company.getCompanyEmail()!=null ? company.getCompanyEmail() : "");
             phoneLine.setText(company.getPhoneNo()!=null ? company.getPhoneNo() : "");
             addressLine.setText(company.getAddress() !=null? company.getAddress().replace("\n", ", "):null);
             websiteLine.setText(company.getWebsite()!=null? company.getWebsite():null);
-            websiteLine.setHref(company.getWebsite()!=null && company.getWebsite().isBlank() ? "#" : company.getWebsite());
+
+            websiteLine.setHref(company.getWebsite()==null || company.getWebsite().isBlank() ? "#" : company.getWebsite());
             footerName.setText(LocalDateTime.now().getYear() + company.getName() + " All rights reserved.");
         }
     }

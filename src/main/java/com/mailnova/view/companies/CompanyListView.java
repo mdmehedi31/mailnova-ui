@@ -50,6 +50,8 @@ public class CompanyListView extends VerticalLayout {
         body.setWidthFull();
         body.setFlexGrow(0, listContainer);
         body.setFlexGrow(1, detailContainer);
+
+        listContainer.getStyle().setMaxHeight("calc(108vh - 220px)").setPadding("4px");
         body.getStyle().set("align-items", "flex-start").setMarginTop("-36px");//.set("gap", "1.5rem");
 
         listContainer.addClassName("mn-list-panel");
@@ -120,12 +122,16 @@ public class CompanyListView extends VerticalLayout {
         items.setSpacing(false);
         items.addClassName("mn-list-items");
         items.setId("mn-list-items");
-
+          /*max-height: calc(108vh - 220px);
+        overflow-y: auto;
+        padding-right: 4px;*/
+        items.getStyle().set("overflow-y", "auto");
         renderItems(items, companies);
 
         Div infoBanner = buildInfoBanner(companies.size());
 
         listContainer.removeAll();
+
         listContainer.add(searchWrapper, items, infoBanner);
     }
 

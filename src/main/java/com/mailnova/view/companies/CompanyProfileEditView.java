@@ -15,9 +15,11 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +37,9 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
     private CompanyPreviewBuilder.Handle previewHandle;
 
     private final TextField nameField = new TextField("Company Name");
-    private final TextField companyEmailField = new TextField("Company Email");
-    private final TextField sendingAddressField = new TextField("Email Sending Address");
-    private final TextField contactEmailField = new TextField("Contact Email");
+    private final EmailField companyEmailField = new  EmailField("Company Email");
+    private final  EmailField sendingAddressField = new  EmailField("Email Sending Address");
+    private final  EmailField contactEmailField = new  EmailField("Contact Email");
     private final TextField phoneField = new TextField("Phone Number");
     private final TextField websiteField = new TextField("Website");
     private final TextArea addressField = new TextArea("Address");
@@ -52,6 +54,13 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
         setSpacing(false);
         setWidthFull();
         getStyle().set("max-width", "1400px").set("margin", "0 auto").set("box-sizing", "border-box");
+        nameField.setRequired(true);
+        nameField.setRequiredIndicatorVisible(false);
+        nameField.setErrorMessage("Company Name can't be empty");
+        companyEmailField.setRequired(true);
+        companyEmailField.setRequiredIndicatorVisible(false);
+        companyEmailField.setErrorMessage("Company Email can't be empty");
+
     }
 
     @Override
@@ -137,7 +146,7 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
         configureFields();
 
         Div row1 = fieldRow(required(nameField), required(companyEmailField));
-        Div row2 = fieldRow(required(sendingAddressField), contactEmailField);
+        Div row2 = fieldRow(sendingAddressField, contactEmailField);
         Div row3 = fieldRow(phoneField, websiteField);
 
         addressField.setWidthFull();
@@ -157,7 +166,28 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
         Button save = new Button("Save Changes", new Icon(VaadinIcon.CHECK_SQUARE_O));
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         save.addClassName("mn-primary-button");
-        save.addClickListener(e -> saveChanges());
+        save.addClickListener(e ->{
+
+            if(nameField.getValue() != null && !nameField.getValue().isBlank()
+                    && companyEmailField.getValue() != null && !companyEmailField.getValue().isBlank() ){
+                saveChanges();
+            }
+            else{
+                nameField.setInvalid(nameField.getValue() == null || nameField.getValue().isBlank());
+                companyEmailField.setInvalid(companyEmailField.getValue() == null || companyEmailField.getValue().isBlank());
+            }
+        });
+
+        nameField.setValueChangeMode(ValueChangeMode.EAGER);
+        nameField.addValueChangeListener(e->{
+            nameField.setInvalid(nameField.getValue() == null || nameField.getValue().isBlank());
+        });
+
+        companyEmailField.setValueChangeMode(ValueChangeMode.EAGER);
+        companyEmailField.addValueChangeListener(e->{
+            companyEmailField.setInvalid(companyEmailField.getValue() == null || companyEmailField.getValue().isBlank());
+
+        });
 
         HorizontalLayout actions = new HorizontalLayout(cancel, save);
         actions.addClassName("mn-form-actions");
@@ -191,10 +221,12 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
         timezoneField.setValue(nullSafe("(GMT+06:00) Asia/Dhaka"));
         timezoneField.setWidthFull();
 
-        for (TextField field : List.of(nameField, companyEmailField, sendingAddressField,
-                contactEmailField, phoneField, websiteField)) {
-            field.setWidthFull();
-        }
+        nameField.setWidthFull();
+        companyEmailField.setWidthFull();
+        sendingAddressField.setWidthFull();
+        contactEmailField.setWidthFull();
+        phoneField.setWidthFull();
+        websiteField.setWidthFull();
 
         nameField.setPrefixComponent(new Icon(VaadinIcon.OFFICE));
         companyEmailField.setPrefixComponent(new Icon(VaadinIcon.ENVELOPE_O));
@@ -207,10 +239,12 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
             company.setName(e.getValue());
             previewHandle.update(company);
         });
-        companyEmailField.addValueChangeListener(e -> company.setCompanyEmail(e.getValue()));
+        companyEmailField.addValueChangeListener(e ->{
+            company.setCompanyEmail(e.getValue());
+            previewHandle.update(company);
+        });
         sendingAddressField.addValueChangeListener(e -> {
             company.setFromEmailSendAddress(e.getValue());
-            previewHandle.update(company);
         });
         contactEmailField.addValueChangeListener(e -> company.setContactEmail(e.getValue()));
         phoneField.addValueChangeListener(e -> {
@@ -283,10 +317,17 @@ public class CompanyProfileEditView extends VerticalLayout implements HasUrlPara
         return field;
     }
 
+    private EmailField required(EmailField field) {
+        field.addClassName("mn-required-field");
+        return field;
+    }
+
+
     private void saveChanges() {
 
         if(company!=null) {
 
+            company.setCreatedBy(userId);
             if(company.getId() ==null){
                 companyService.update(company);
             }else{
