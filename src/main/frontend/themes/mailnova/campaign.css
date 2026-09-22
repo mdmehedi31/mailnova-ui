@@ -1,0 +1,1376 @@
+/* =====================================================================
+   MailNova theme
+   Global SaaS look: white cards, rounded corners, soft shadows, generous
+   whitespace. No horizontal scrolling anywhere — every layout uses
+   flex/grid with wrapping styles.cssinstead of fixed pixel widths.
+   ===================================================================== */
+
+:root {
+    --mn-bg: #F1F5F9;
+    --mn-card-bg: #FFFFFF;
+    --mn-border: #E2E8F0;
+    --mn-text-primary: #0F172A;
+    --mn-text-secondary: #64748B;
+    --mn-text-muted: #94A3B8;
+    --mn-text: #0F172A;
+    --mn-indigo: #6366F1;
+    --mn-indigo-dark: #4F46E5;
+    --mn-blue: #3B82F6;
+    --mn-green: #10B981;
+    --mn-purple: #8B5CF6;
+    --mn-orange: #F97316;
+    --mn-blue-bg: #EFF6FF;
+
+    --mn-sidebar-bg: #0F172A;
+    --mn-sidebar-hover: #1E293B;
+    --mn-sidebar-selected: #6366F1;
+    --mn-sidebar-text: #FFFFFF;
+    --mn-sidebar-text-muted: #94A3B8;
+
+    --mn-radius-sm: 8px;
+    --mn-radius-md: 12px;
+    --mn-radius-lg: 16px;
+    --mn-radius-xl: 20px;
+
+    --mn-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --mn-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06);
+    --mn-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10);
+
+    --mn-sidebar-width: 264px;
+}
+
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    background: var(--mn-bg);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* =====================================================================
+   Shell: sidebar + top bar
+   ===================================================================== */
+
+.mn-shell {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.mn-shell::part(navbar) {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--mn-border);
+    box-shadow: none;
+    padding: 0;
+}
+
+.mn-shell::part(drawer) {
+    width: var(--mn-sidebar-width);
+    background: var(--mn-sidebar-bg);
+    border-right: none;
+    padding: 0;
+}
+.mn-datetime-row {
+    flex-direction: column;
+}
+
+
+.mn-schedule-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--mn-blue-bg);
+    color: #1D4ED8;
+    border-radius: var(--mn-radius-sm);
+    padding: 10px 12px;
+    font-size: 0.82rem;
+}
+
+.mn-sidebar {
+    background: var(--mn-sidebar-bg);
+    overflow-x: hidden;
+}
+
+.mn-brand {
+    padding: 24px 20px;
+    gap: 10px;
+}
+
+.mn-brand-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: var(--mn-radius-sm);
+    background: var(--mn-indigo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mn-brand-icon-glyph {
+    color: #FFFFFF;
+    width: 20px;
+    height: 20px;
+}
+
+.mn-brand-title {
+    color: #FFFFFF;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.mn-nav-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px 12px;
+}
+
+.mn-nav {
+    gap: 2px;
+}
+
+.mn-nav-item, .mn-nav-subitem {
+    padding: 10px 12px;
+    border-radius: var(--mn-radius-sm);
+    cursor: pointer;
+    color: var(--mn-sidebar-text-muted);
+    transition: background-color 150ms ease, color 150ms ease;
+    user-select: none;
+}
+
+.mn-nav-item:hover, .mn-nav-subitem:hover {
+    background: var(--mn-sidebar-hover);
+    color: #FFFFFF;
+}
+
+.mn-nav-item-selected {
+    background: var(--mn-sidebar-selected) !important;
+    color: #FFFFFF !important;
+}
+
+.mn-nav-icon {
+    width: 18px;
+    height: 18px;
+    color: inherit;
+}
+
+.mn-nav-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: inherit;
+}
+
+.mn-nav-sub {
+    padding-left: 30px;
+    gap: 2px;
+    margin-top: 2px;
+    margin-bottom: 6px;
+}
+
+.mn-timezone-select {
+    width: 100%;
+}
+
+.mn-nav-subdot {
+    width: 5px;
+    height: 5px;
+    min-width: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.6;
+}
+
+.mn-user-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 10px;
+    cursor: pointer;
+}
+
+.mn-user-avatar {
+    width: 32px;
+    height: 32px;
+}
+
+.mn-user-name {
+    color: #FFFFFF;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mn-user-role {
+    color: var(--mn-sidebar-text-muted);
+    font-size: 0.75rem;
+}
+
+.mn-user-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--mn-sidebar-text-muted);
+}
+
+/* Top bar */
+
+.mn-topbar {
+    padding: 12px 24px;
+    gap: 16px;
+    width: 100%;
+}
+
+.mn-drawer-toggle {
+    color: var(--mn-text-secondary);
+}
+
+.mn-search-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 480px;
+}
+
+.mn-search {
+    width: 100%;
+}
+
+.mn-search::part(input-field) {
+    border-radius: var(--mn-radius-md);
+    background: var(--mn-bg);
+    border: 1px solid var(--mn-border);
+}
+
+.mn-notification-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.mn-notification-wrap:hover {
+    background: var(--mn-bg);
+}
+
+.mn-topbar-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--mn-text-secondary);
+}
+
+.mn-notification-dot {
+    position: absolute;
+    top: 9px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #EF4444;
+    border: 2px solid #FFFFFF;
+}
+
+.mn-user-menu {
+    --lumo-button-size: auto;
+}
+
+.mn-topbar-avatar {
+    width: 34px;
+    height: 34px;
+}
+
+/* =====================================================================
+   Page shell
+   ===================================================================== */
+
+.mn-page {
+    padding: 28px clamp(16px, 3vw, 40px) 40px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.mn-breadcrumb {
+    color: var(--mn-indigo);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.mn-breadcrumb-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--mn-indigo);
+}
+
+.mn-breadcrumb-link {
+    color: var(--mn-indigo);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.mn-breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+
+.mn-later-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* =====================================================================
+   Section header (page title + per-step main content header)
+   ===================================================================== */
+
+.mn-section-header {
+    gap: 16px;
+}
+
+.mn-section-badge {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: var(--mn-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mn-section-badge-lg {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: var(--mn-radius-lg);
+}
+
+.mn-section-badge-icon {
+    width: 24px;
+    height: 24px;
+    color: #FFFFFF;
+}
+
+.mn-section-badge-lg .mn-section-badge-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.mn-section-header-text {
+    gap: 4px;
+    min-width: 0;
+}
+
+.mn-page-title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.mn-page-subtitle {
+    color: var(--mn-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.mn-step-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-step-subtitle {
+    color: var(--mn-text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+/* Accent colors, reused for badges + row icons + stepper theming */
+
+.mn-accent-indigo { background: var(--mn-indigo); }
+.mn-accent-blue { background: var(--mn-blue); }
+.mn-accent-green { background: var(--mn-green); }
+.mn-accent-purple { background: var(--mn-purple); }
+.mn-accent-orange { background: var(--mn-orange); }
+
+/* =====================================================================
+   Wizard stepper (horizontal, always above the two-column content)
+   ===================================================================== */
+
+.mn-wizard-slot {
+    width: 100%;
+}
+
+.mn-wizard {
+    background: var(--mn-card-bg);
+    border-radius: var(--mn-radius-lg);
+    box-shadow: var(--mn-shadow-md);
+    padding: 20px 28px;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.mn-wizard-step {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.mn-wizard-circle {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 150ms ease;
+}
+
+.mn-wizard-circle-completed {
+    background: var(--mn-indigo);
+    color: #FFFFFF;
+}
+
+.mn-wizard-circle-active {
+    background: var(--mn-indigo);
+    color: #FFFFFF;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+    transform: scale(1.06);
+}
+
+.mn-wizard-circle-future {
+    background: #E2E8F0;
+    color: var(--mn-text-muted);
+}
+
+.mn-wizard-check {
+    width: 16px;
+    height: 16px;
+    color: #FFFFFF;
+}
+
+.mn-wizard-label {
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.mn-wizard-label-active {
+    color: var(--mn-indigo);
+}
+
+.mn-wizard-label-completed {
+    color: var(--mn-text-primary);
+}
+
+.mn-wizard-label-future {
+    color: var(--mn-text-muted);
+    font-weight: 500;
+}
+
+.mn-wizard-connector {
+    height: 2px;
+    min-width: 32px;
+    background: #E2E8F0;
+    margin: 0 12px;
+    border-radius: 1px;
+}
+
+.mn-wizard-connector-filled {
+    background: var(--mn-indigo);
+}
+
+/* =====================================================================
+   Two-column content area: Main Content (left) + Campaign Summary (right)
+   ===================================================================== */
+
+.mn-content-area {
+    align-items: flex-start;
+    gap: 24px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.mn-card {
+    background: var(--mn-card-bg);
+    border-radius: var(--mn-radius-lg);
+    box-shadow: var(--mn-shadow-md);
+    border: 1px solid var(--mn-border);
+}
+
+.mn-main-card {
+    flex: 1 1 640px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 32px;
+}
+
+.mn-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: 100%;
+    min-width: 0;
+}
+
+.mn-summary-column {
+    flex: 0 0 340px;
+    width: 340px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.mn-summary-panel {
+    gap: 20px;
+}
+
+.mn-summary-card {
+    padding: 24px;
+}
+
+.mn-summary-header {
+    gap: 4px;
+}
+
+.mn-summary-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-summary-hint {
+    color: var(--mn-text-muted);
+    font-size: 0.82rem;
+}
+
+.mn-summary-divider {
+    height: 1px;
+    background: var(--mn-border);
+    margin: 16px 0;
+}
+
+.mn-summary-rows {
+    gap: 16px;
+}
+
+.mn-summary-row {
+    gap: 12px;
+}
+
+.mn-summary-row-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: var(--mn-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mn-summary-row-glyph {
+    width: 17px;
+    height: 17px;
+    color: #FFFFFF;
+}
+
+.mn-summary-row-label {
+    color: var(--mn-text-muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.mn-summary-row-value {
+    color: var(--mn-text-primary);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.mn-summary-extra {
+    gap: 20px;
+}
+
+/* Quick tips card (Audience step) */
+
+.mn-tips-card {
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+    border-radius: var(--mn-radius-lg);
+    padding: 20px;
+}
+
+.mn-tips-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--mn-blue);
+}
+
+.mn-tips-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1E3A8A;
+}
+
+.mn-tips-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #1E40AF;
+    font-size: 0.85rem;
+    line-height: 1.7;
+}
+
+/* Content preview mini-card (Schedule & Review step) */
+
+.mn-content-preview-card {
+    padding: 20px;
+}
+
+.mn-content-preview-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-mini-preview-thumb {
+    width: 100%;
+    border-radius: var(--mn-radius-md);
+    padding: 28px 16px;
+    background: linear-gradient(135deg, #0F172A 0%, #312E81 100%);
+    gap: 6px;
+}
+
+.mn-mini-preview-heading {
+    margin: 4px 0 0;
+    color: #FFFFFF;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.mn-mini-preview-body {
+    color: #CBD5E1;
+    font-size: 0.8rem;
+}
+
+.mn-content-preview-link {
+    color: var(--mn-indigo);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.mn-content-preview-link:hover {
+    text-decoration: underline;
+}
+
+/* =====================================================================
+   Forms (Details step)
+   ===================================================================== */
+
+.mn-form {
+    width: 100%;
+    --vaadin-form-item-label-width: auto;
+    row-gap: 20px;
+    column-gap: 20px;
+}
+
+.mn-description-area {
+    --lumo-text-field-size: auto;
+}
+
+.mn-description-area textarea {
+    min-height: 96px;
+}
+
+vaadin-text-field::part(input-field),
+vaadin-email-field::part(input-field),
+vaadin-text-area::part(input-field),
+vaadin-combo-box::part(input-field),
+vaadin-date-picker::part(input-field),
+vaadin-time-picker::part(input-field),
+vaadin-select vaadin-select-value-button {
+    border-radius: var(--mn-radius-sm);
+    background: var(--mn-card-bg);
+    border: 1px solid var(--mn-border);
+    box-shadow: none;
+}
+
+vaadin-text-field, vaadin-email-field, vaadin-text-area, vaadin-combo-box,
+vaadin-date-picker, vaadin-time-picker, vaadin-select {
+    width: 100%;
+}
+
+/* =====================================================================
+   Audience step
+   ===================================================================== */
+
+.mn-tabs {
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.mn-tab-button {
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-sm);
+    background: var(--mn-card-bg);
+    color: var(--mn-text-secondary);
+    font-weight: 600;
+    padding: 10px 18px;
+}
+
+.mn-tab-button-active {
+    border-color: var(--mn-indigo);
+    background: #EEF2FF;
+    color: var(--mn-indigo);
+}
+
+.mn-import-row {
+    gap: 20px;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+.mn-upload-card {
+    flex: 1 1 320px;
+    min-width: 280px;
+    border: 2px dashed var(--mn-border);
+    border-radius: var(--mn-radius-lg);
+    background: #F8FAFC;
+    padding: 36px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 150ms ease;
+}
+
+.mn-upload-card:hover {
+    border-color: var(--mn-green);
+}
+
+.mn-upload-content {
+    gap: 10px;
+    text-align: center;
+}
+
+.mn-upload-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--mn-green);
+    margin-bottom: 6px;
+}
+
+.mn-upload-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-upload-hint {
+    color: var(--mn-text-muted);
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+}
+
+.mn-upload-widget vaadin-button,
+.mn-upload-widget::part(upload-button) {
+    border-radius: var(--mn-radius-sm);
+    background: var(--mn-green);
+    color: #FFFFFF;
+}
+
+.mn-requirements-card {
+    flex: 1 1 280px;
+    min-width: 260px;
+    background: #ECFDF5;
+    border: 1px solid #D1FAE5;
+    border-radius: var(--mn-radius-lg);
+    padding: 24px;
+}
+
+.mn-requirements-title {
+    margin: 0 0 4px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #065F46;
+}
+
+.mn-requirements-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.mn-requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #047857;
+    font-size: 0.86rem;
+}
+
+.mn-requirement-check {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    color: var(--mn-green);
+}
+
+.mn-download-row {
+    margin-top: 4px;
+}
+
+.mn-download-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--mn-green);
+}
+
+.mn-download-link {
+    color: #047857;
+    font-weight: 600;
+    font-size: 0.86rem;
+    text-decoration: none;
+}
+
+.mn-download-link:hover {
+    text-decoration: underline;
+}
+
+.mn-divider {
+    gap: 16px;
+    margin: 6px 0;
+}
+
+.mn-divider-line {
+    height: 1px;
+    background: var(--mn-border);
+}
+
+.mn-divider-label {
+    color: var(--mn-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.mn-manual-section {
+    gap: 12px;
+}
+
+.mn-manual-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-manual-subtitle {
+    color: var(--mn-text-secondary);
+    font-size: 0.85rem;
+    margin-top: -8px;
+}
+
+.mn-manual-textarea textarea {
+    min-height: 120px;
+}
+
+.mn-info-box {
+    background: #EFF6FF;
+    border-radius: var(--mn-radius-sm);
+    padding: 12px 14px;
+}
+
+.mn-info-icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    color: var(--mn-blue);
+}
+
+.mn-info-text {
+    color: #1E40AF;
+    font-size: 0.82rem;
+}
+
+.mn-total-row {
+    background: #F8FAFC;
+    border-radius: var(--mn-radius-md);
+    padding: 16px 18px;
+    gap: 12px;
+}
+
+.mn-total-icon-badge {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: var(--mn-radius-sm);
+    background: #DCFCE7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mn-total-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--mn-green);
+}
+
+.mn-total-label {
+    color: var(--mn-text-muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.mn-total-value {
+    color: var(--mn-text-primary);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* =====================================================================
+   Content step
+   ===================================================================== */
+
+.mn-content-fields {
+    gap: 16px;
+}
+
+.mn-preview-section {
+    gap: 16px;
+}
+
+.mn-preview-header {
+    gap: 12px;
+}
+
+.mn-preview-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-preview-toggle-group {
+    background: #F1F5F9;
+    border-radius: var(--mn-radius-sm);
+    padding: 4px;
+    gap: 4px;
+}
+
+.mn-preview-toggle {
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--mn-text-secondary);
+    background: transparent;
+}
+
+.mn-preview-toggle-active {
+    background: var(--mn-indigo);
+    color: #FFFFFF;
+}
+
+.mn-preview-row {
+    gap: 20px;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+.mn-preview-frame {
+    flex: 2 1 380px;
+    min-width: 280px;
+    background: #F8FAFC;
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-lg);
+    padding: 28px;
+    display: flex;
+    justify-content: center;
+    transition: padding 200ms ease;
+}
+
+.mn-preview-mobile {
+    padding: 28px 90px;
+}
+
+.mn-preview-mock {
+    width: 100%;
+    max-width: 420px;
+    background: linear-gradient(135deg, #0F172A 0%, #312E81 60%, #4C1D95 100%);
+    border-radius: var(--mn-radius-md);
+    padding: 32px 24px;
+    gap: 10px;
+    color: #FFFFFF;
+}
+
+.mn-preview-logo {
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.mn-preview-logo-icon {
+    width: 16px;
+    height: 16px;
+    color: #A5B4FC;
+}
+
+.mn-preview-logo-text {
+    color: #A5B4FC;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.mn-preview-heading {
+    margin: 8px 0 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.mn-preview-body {
+    color: #CBD5E1;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.mn-preview-cta {
+    background: var(--mn-indigo);
+    color: #FFFFFF;
+    border-radius: var(--mn-radius-sm);
+    font-weight: 700;
+    padding: 10px 24px;
+    margin-top: 6px;
+}
+
+.mn-preview-footer {
+    color: #94A3B8;
+    font-size: 0.75rem;
+    margin-top: 24px;
+}
+
+.mn-preview-socials {
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.mn-preview-social-icon {
+    width: 14px;
+    height: 14px;
+    color: #64748B;
+}
+
+.mn-template-details-card {
+    flex: 1 1 220px;
+    min-width: 200px;
+    background: #F8FAFC;
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-lg);
+    padding: 24px;
+}
+
+.mn-template-details-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-template-details-label {
+    color: var(--mn-text-muted);
+    font-size: 0.76rem;
+    font-weight: 500;
+}
+
+.mn-template-details-value {
+    color: var(--mn-text-primary);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.mn-template-details-link {
+    color: var(--mn-purple);
+    font-weight: 600;
+    font-size: 0.84rem;
+    text-decoration: none;
+}
+
+.mn-template-details-link:hover {
+    text-decoration: underline;
+}
+
+.mn-template-details-link-icon {
+    width: 13px;
+    height: 13px;
+    color: var(--mn-purple);
+}
+
+/* =====================================================================
+   Schedule & Review step
+   ===================================================================== */
+
+.mn-schedule-card, .mn-additional-settings-card {
+    padding: 28px;
+}
+
+.mn-schedule-title {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mn-text-primary);
+}
+
+.mn-schedule-radio {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mn-schedule-fields {
+    padding-left: 4px;
+    gap: 16px;
+}
+
+.mn-schedule-datetime-row {
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.mn-schedule-datetime-row > * {
+    flex: 1 1 200px;
+    min-width: 180px;
+}
+
+.mn-schedule-info-box {
+    background: #FFF7ED;
+    border: 1px solid #FFEDD5;
+    border-radius: var(--mn-radius-md);
+    padding: 14px 16px;
+}
+
+.mn-schedule-info-box .mn-info-icon {
+    color: var(--mn-orange);
+}
+
+.mn-schedule-info-text {
+    color: #9A3412;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.mn-schedule-content {
+    gap: 16px;
+}
+
+.mn-additional-settings {
+    gap: 18px;
+}
+
+.mn-toggle-row {
+    gap: 12px;
+}
+
+.mn-toggle-label {
+    color: var(--mn-text-primary);
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.mn-toggle-switch {
+    --lumo-primary-color: var(--mn-indigo);
+}
+
+.mn-confirmation-banner {
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+    border-radius: var(--mn-radius-lg);
+    padding: 20px 24px;
+}
+
+.mn-confirmation-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    color: var(--mn-indigo);
+}
+
+.mn-confirmation-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1E3A8A;
+}
+
+.mn-confirmation-subtitle {
+    color: #1E40AF;
+    font-size: 0.85rem;
+}
+
+/* =====================================================================
+   Bottom action bar — do not restyle positions, only visual polish
+   ===================================================================== */
+
+.mn-action-bar {
+    background: var(--mn-card-bg);
+    border-top: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-lg);
+    padding: 20px 28px;
+    gap: 12px;
+    box-shadow: var(--mn-shadow-sm);
+}
+
+.mn-btn-secondary {
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-sm);
+    background: var(--mn-card-bg);
+    color: var(--mn-text-primary);
+    font-weight: 600;
+    padding: 10px 22px;
+    transition: transform 120ms ease, background-color 120ms ease;
+}
+
+.mn-btn-secondary:hover {
+    background: var(--mn-bg);
+    transform: translateY(-1px);
+}
+
+.mn-btn-primary, .mn-btn-next, .mn-btn-schedule {
+    border-radius: var(--mn-radius-sm);
+    background: var(--mn-indigo);
+    color: #FFFFFF;
+    font-weight: 600;
+    padding: 10px 24px;
+    transition: transform 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.mn-btn-primary:hover {
+    background: var(--mn-indigo-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.32);
+}
+
+
+.mn-schedule-panel {
+    background: #FAFAFA;
+    border: 1px solid var(--mn-border);
+    border-radius: var(--mn-radius-md);
+    padding: 18px;
+    min-width: 280px;
+    box-sizing: border-box;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+
+.mn-panel-title {
+    margin: 0 0 14px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--mn-text);
+}
+
+
+.mn-radio-group {
+    margin-bottom: 12px;
+}
+
+/* =====================================================================
+   Responsive breakpoints
+   ===================================================================== */
+
+@media (max-width: 1024px) {
+    .mn-content-area {
+        flex-wrap: wrap;
+    }
+
+    .mn-main-card {
+        flex: 1 1 100%;
+    }
+
+    .mn-summary-column {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    .mn-shell::part(drawer) {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 640px) {
+    .mn-page {
+        padding: 20px 16px 32px;
+        gap: 16px;
+    }
+
+    .mn-main-card, .mn-schedule-card, .mn-additional-settings-card {
+        padding: 20px;
+    }
+
+    .mn-wizard {
+        padding: 16px;
+    }
+
+    .mn-wizard-label {
+        display: none;
+    }
+
+    .mn-wizard-connector {
+        min-width: 16px;
+        margin: 0 6px;
+    }
+
+    .mn-action-bar {
+        flex-wrap: wrap;
+        padding: 16px 20px;
+    }
+
+    .mn-action-bar > * {
+        flex: 1 1 auto;
+    }
+
+    .mn-section-badge {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+    }
+
+    .mn-section-badge-lg {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+    }
+
+    .mn-page-title {
+        font-size: 1.3rem;
+    }
+
+    .mn-preview-mobile {
+        padding: 20px 24px;
+    }
+}
