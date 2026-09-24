@@ -1,4 +1,4 @@
-package com.mailnova.view.service;
+package com.mailnova.service;
 
 import com.mailnova.DTO.CompanyProfileDto;
 import com.mailnova.endpoint.CompanyProfileCaller;
@@ -22,11 +22,12 @@ public class CompanyProfileService {
 
     private CompanyProfileCaller profileCaller;
 
-    public CompanyProfileService(CompanyProfileCaller profileCaller) {
+    public CompanyProfileService(CompanyProfileCaller profileCaller)
+    {
         this.profileCaller = profileCaller;
     }
 
-    public List<CompanyProfileDto> findAll(Integer userId) {
+    public List<CompanyProfileDto> getAllCompanyByCreator(Integer userId) {
         return this.profileCaller.getCompanyProfilesByUserId(userId);
     }
 

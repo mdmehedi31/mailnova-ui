@@ -2,8 +2,8 @@ package com.mailnova.view.companies;
 
 
 import com.mailnova.DTO.CompanyProfileDto;
+import com.mailnova.service.CompanyProfileService;
 import com.mailnova.view.MainLayout;
-import com.mailnova.view.service.CompanyProfileService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

@@ -1,5 +1,8 @@
 package com.mailnova.view.campaign;
 
+import com.mailnova.DTO.EmailCampaignDto;
+import com.mailnova.service.CompanyProfileService;
+import com.mailnova.service.EmailTemplateService;
 import com.mailnova.view.MainLayout;
 import com.mailnova.view.campaign.components.SectionHeader;
 import com.mailnova.view.campaign.components.SummaryPanel;
@@ -21,43 +24,28 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-/**
- * The Campaign Create wizard shell.
- *
- * <p>Layout, top to bottom, shared and unchanged across all 4 steps:
- * <pre>
- *   Back-to-Campaigns link
- *   Page header (icon + "Create Email Campaign" + subtitle)
- *   Horizontal WizardStepper
- *   ┌───────────────────────────────┬─────────────────┐
- *   │ Main Content (step header +   │ Campaign Summary │
- *   │ step-specific fields)         │ (shared)         │
- *   └───────────────────────────────┴─────────────────┘
- *   Bottom action bar: Back / Save Draft / Next|Schedule Campaign
- * </pre>
- * Only the component inside {@link #mainContentSlot} changes when the
- * wizard step changes; the wizard, the summary panel, and the action bar
- * stay in place.
- */
 @Route(value = "campaigns/create", layout = MainLayout.class)
 @PageTitle("Create Email Campaign | MailNova")
 public class CreateCampaignView extends VerticalLayout {
 
     private final CampaignDraft draft = new CampaignDraft();
     private final SummaryPanel summaryPanel = new SummaryPanel();
-
+    private final EmailCampaignDto emailCampaignDto = new EmailCampaignDto();
     private final Div wizardSlot = new Div();
     private final Div mainContentSlot = new Div();
     private Component[] stepComponents;
     private  Button backBtn = new Button("Back", VaadinIcon.ARROW_LEFT.create());
     private  Button saveDraftBtn = new Button("Save Draft");
     private  Button nextBtn = new Button("Next", VaadinIcon.ARROW_RIGHT.create());
-
+    private CompanyProfileService companyProfileService;
+    private EmailTemplateService emailTemplateService;
     private int currentStep = 1;
 
-    public CreateCampaignView() {
+    public CreateCampaignView(CompanyProfileService companyProfileService, EmailTemplateService emailTemplateService) {
+        this.companyProfileService = companyProfileService;
+        this.emailTemplateService = emailTemplateService;
+
         addClassName("mn-page");
         setPadding(false);
         setSpacing(false);
@@ -180,10 +168,10 @@ public class CreateCampaignView extends VerticalLayout {
 
         mainContentSlot.removeAll();
         mainContentSlot.add(switch (currentStep) {
-            case 1 -> new DetailsStep(draft, summaryPanel);
-            case 2 -> new AudienceStep(draft, summaryPanel);
-            case 3 -> new ContentStep(draft, summaryPanel);
-            default -> new ScheduleReviewStep(draft, summaryPanel);
+            case 1 -> new DetailsStep(draft, summaryPanel, emailCampaignDto, companyProfileService);
+            case 2 -> new AudienceStep(draft, summaryPanel,emailCampaignDto);
+            case 3 -> new ContentStep(draft, summaryPanel,emailCampaignDto,emailTemplateService,companyProfileService);
+            default -> new ScheduleReviewStep(draft, summaryPanel,emailCampaignDto);
         });
 
         backBtn.setEnabled(currentStep > 1);

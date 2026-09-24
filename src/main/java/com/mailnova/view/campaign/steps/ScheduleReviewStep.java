@@ -1,8 +1,11 @@
 package com.mailnova.view.campaign.steps;
 
+import com.mailnova.DTO.EmailCampaignDto;
+import com.mailnova.enums.SendChoice;
 import com.mailnova.view.campaign.components.SectionHeader;
 import com.mailnova.view.campaign.components.SummaryPanel;
 import com.mailnova.view.campaign.model.CampaignDraft;
+import com.mailnova.view.utils.Utils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -15,29 +18,31 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Locale;
 
-/**
- * Step 4 — Schedule &amp; Review. Orange theme.
- * Send Now / Schedule for Later toggle, conditional date/time/timezone
- * pickers, additional settings, and a confirmation banner. The detailed
- * review data (campaign name, company, recipients, template, schedule)
- * lives in the shared {@link SummaryPanel} on the right, plus a small
- * content-preview card appended beneath it.
- */
+@Slf4j
 public class ScheduleReviewStep extends VerticalLayout {
 
     private final Div scheduleFields = new Div();
     private final Div infoBox = new Div();
     private final Span infoText = new Span();
     private final CampaignDraft draft;
-    public ScheduleReviewStep(CampaignDraft draft, SummaryPanel summary) {
+    private EmailCampaignDto emailCampaignDto;
+    DatePicker date = new DatePicker("Date");
+    TimePicker time = new TimePicker("Time");
+    ComboBox<String> timezone = new ComboBox<>("Timezone");
+    public ScheduleReviewStep(CampaignDraft draft, SummaryPanel summary, EmailCampaignDto emailCampaignDto) {
 
         this.draft = draft;
+        this.emailCampaignDto = emailCampaignDto;
 
         addClassName("mn-step-content");
         setPadding(false);
@@ -66,26 +71,27 @@ public class ScheduleReviewStep extends VerticalLayout {
         H4 title = new H4("Schedule Options");
         title.addClassName("mn-panel-title");
 
-        RadioButtonGroup<String> sendChoice = new RadioButtonGroup<>();
+        RadioButtonGroup<SendChoice> sendChoice = new RadioButtonGroup<>();
         sendChoice.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        sendChoice.setItems("Send Now", "Schedule for Later");
-        sendChoice.setValue("Schedule for Later");
+        sendChoice.setItems(SendChoice.values());
+        sendChoice.setItemLabelGenerator(SendChoice::getLabel);
+        sendChoice.setValue(SendChoice.SEND_NO);
         sendChoice.addClassName("mn-radio-group");
 
         Div laterFields = new Div();
         laterFields.addClassName("mn-later-fields");
 
-        DatePicker date = new DatePicker("Date");
+
         date.setRequiredIndicatorVisible(true);
         date.setValue(LocalDate.of(2026, 9, 25));
         date.setWidthFull();
 
-        TimePicker time = new TimePicker("Time");
+
         time.setRequiredIndicatorVisible(true);
         time.setValue(LocalTime.of(16, 0));
         time.setWidthFull();
 
-        ComboBox<String> timezone = new ComboBox<>("Timezone");
+
         timezone.setItems("America/New_York (EST)", "Asia/Dhaka (GMT+6)", "Europe/London (GMT)",
                 "America/Los_Angeles (PST)", "Asia/Tokyo (JST)");
         timezone.setValue("America/New_York (EST)");
@@ -107,10 +113,25 @@ public class ScheduleReviewStep extends VerticalLayout {
         scheduleNote.add(clock, noteText);
         laterFields.add(scheduleNote);
 
+        if (sendChoice.getValue()!=null && sendChoice.getValue() == SendChoice.SEND_NO) {
+            laterFields.setVisible(false);
+        }
+
         sendChoice.addValueChangeListener(e -> {
-            boolean isLater = "Schedule for Later".equals(e.getValue());
-            laterFields.setVisible(isLater);
-            draft.setSendNow(!isLater);
+
+            log.info("Selected send choice: {}", e.getValue());
+
+            if(e.getValue().equals(SendChoice.SCHEDULE_FOR_LATER)) {
+                log.info("Selected send choice for later campaign");
+                laterFields.setVisible(true);
+                draft.setSendNow(false);
+
+            }else{
+                log.info("Selected send choice for now campaign");
+                laterFields.setVisible(false);
+                draft.setSendNow(true);
+                emailCampaignDto.setSendScheduleDate(Instant.now().plus(3, ChronoUnit.MINUTES));
+            }
         });
 
         Div additional = new Div();
@@ -125,15 +146,37 @@ public class ScheduleReviewStep extends VerticalLayout {
 
         panel.add(title, sendChoice, laterFields/*, additional*/);
 
-        date.addValueChangeListener(e -> draft.setScheduleDate(e.getValue()));
-        time.addValueChangeListener(e -> draft.setScheduleTime(e.getValue()));
-        timezone.addValueChangeListener(e -> draft.setTimezone(e.getValue()));
+        date.addValueChangeListener(e -> {
+            draft.setScheduleDate(e.getValue());
+            setScheduleData();
+        });
+
+        time.addValueChangeListener(e ->{
+            draft.setScheduleTime(e.getValue());
+            setScheduleData();
+        });
+        timezone.addValueChangeListener(e ->{
+            draft.setTimezone(e.getValue());
+                setScheduleData();
+        });
         draft.setScheduleDate(date.getValue());
         draft.setScheduleTime(time.getValue());
         draft.setTimezone(timezone.getValue());
         draft.setSendNow(false);
 
+
+
         return panel;
+    }
+
+
+    private void setScheduleData(){
+
+        if(date.getValue() != null && time.getValue() != null && timezone.getValue() != null) {
+
+            Instant scheduleDate = Utils.buildEmailScheduleTime(date.getValue(),time.getValue(),timezone.getValue());
+            emailCampaignDto.setSendScheduleDate(scheduleDate);
+        }
     }
 
     private Component buildScheduleOptions(CampaignDraft draft, SummaryPanel summary) {
@@ -145,12 +188,12 @@ public class ScheduleReviewStep extends VerticalLayout {
         options.setValue(draft.isSendNow() ? "Send Now" : "Schedule for Later");
         options.addClassName("mn-schedule-radio");
 
-        DatePicker date = new DatePicker("Date");
+
         date.setRequiredIndicatorVisible(true);
         date.setValue(LocalDate.now().plusDays(3));
         date.setWidthFull();
 
-        TimePicker time = new TimePicker("Time");
+
         time.setRequiredIndicatorVisible(true);
         time.setValue(LocalTime.of(16, 0));
         time.setWidthFull();

@@ -1,6 +1,8 @@
 package com.mailnova.view.campaign.steps;
 
 
+import com.mailnova.DTO.EmailCampaignDto;
+import com.mailnova.service.CompanyProfileService;
 import com.mailnova.view.campaign.components.SectionHeader;
 import com.mailnova.view.campaign.components.SummaryPanel;
 import com.mailnova.view.campaign.model.CampaignDraft;
@@ -31,8 +33,10 @@ public class AudienceStep extends VerticalLayout {
     private final Span totalRecipientsValue = new Span("0 recipients");
     private final CampaignDraft draft;
     private final SummaryPanel summary;
+    private EmailCampaignDto emailCampaignDto;
+    public AudienceStep(CampaignDraft draft, SummaryPanel summary, EmailCampaignDto emailCampaignDto) {
 
-    public AudienceStep(CampaignDraft draft, SummaryPanel summary) {
+        this.emailCampaignDto = emailCampaignDto;
         this.draft = draft;
         this.summary = summary;
 

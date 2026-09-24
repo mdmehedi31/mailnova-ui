@@ -1,10 +1,9 @@
 package com.mailnova.view.utils;
 
+import java.time.*;
 import java.util.List;
 
 public class Utils {
-
-
 
     public static List<String> colors =List.of(
             "#4F46E5",
@@ -21,4 +20,13 @@ public class Utils {
             "#EAB308",
             "#3B82F6"
     );
+
+    public static Instant buildEmailScheduleTime(LocalDate date,LocalTime time, String timeZone){
+        ZoneId zone = ZoneId.of(timeZone);
+        ZonedDateTime zoned =
+                ZonedDateTime.of(date, time, zone);
+
+        Instant instant = zoned.toInstant();
+        return instant;
+    }
 }

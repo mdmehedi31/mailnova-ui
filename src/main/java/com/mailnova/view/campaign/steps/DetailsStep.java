@@ -1,5 +1,9 @@
 package com.mailnova.view.campaign.steps;
 
+import com.mailnova.DTO.CompanyProfileDto;
+import com.mailnova.DTO.EmailCampaignDto;
+import com.mailnova.enums.CampaignType;
+import com.mailnova.service.CompanyProfileService;
 import com.mailnova.view.campaign.components.SectionHeader;
 import com.mailnova.view.campaign.components.SummaryPanel;
 import com.mailnova.view.campaign.model.CampaignDraft;
@@ -22,7 +26,17 @@ import java.util.List;
  */
 public class DetailsStep extends VerticalLayout {
 
-    public DetailsStep(CampaignDraft draft, SummaryPanel summary) {
+
+    ComboBox<CompanyProfileDto> company = new ComboBox<>("Company");
+
+    private EmailCampaignDto emailCampaignDto;
+    private CompanyProfileService companyProfileService;
+    private Integer userid=1;
+    public DetailsStep(CampaignDraft draft, SummaryPanel summary,
+                       EmailCampaignDto emailCampaignDto,CompanyProfileService companyProfileService) {
+
+        this.emailCampaignDto = emailCampaignDto;
+        this.companyProfileService = companyProfileService;
         addClassName("mn-step-content");
         setPadding(false);
         setSpacing(false);
@@ -35,7 +49,11 @@ public class DetailsStep extends VerticalLayout {
                 false));
 
         add(buildForm(draft, summary));
+
+        loadData();
     }
+
+
 
     private FormLayout buildForm(CampaignDraft draft, SummaryPanel summary) {
         TextField campaignName = new TextField("Campaign Name");
@@ -44,8 +62,11 @@ public class DetailsStep extends VerticalLayout {
         campaignName.setWidthFull();
         campaignName.setValueChangeMode(ValueChangeMode.LAZY);
         campaignName.addValueChangeListener(e -> {
-            draft.setCampaignName(e.getValue());
-            summary.refresh(draft);
+            if(e.getValue() != null) {
+                draft.setCampaignName(e.getValue());
+                summary.refresh(draft);
+                emailCampaignDto.setName(e.getValue());
+            }
         });
 
         TextArea description = new TextArea("Description");
@@ -54,47 +75,87 @@ public class DetailsStep extends VerticalLayout {
         description.setWidthFull();
         description.addClassName("mn-description-area");
         description.setValueChangeMode(ValueChangeMode.LAZY);
-        description.addValueChangeListener(e -> draft.setDescription(e.getValue()));
-
-        ComboBox<String> company = new ComboBox<>("Company");
-        company.setItems(List.of("Acme Corporation", "Nova Retail Group", "Skyline Ventures", "Brightpath Inc."));
-        company.setValue("Acme Corporation");
-        company.setWidthFull();
-        company.addValueChangeListener(e -> {
-            draft.setCompanyProfile(e.getValue());
-            summary.refresh(draft);
+        description.addValueChangeListener(e ->
+        {
+            if(e.getValue() != null) {
+                draft.setDescription(e.getValue());
+                emailCampaignDto.setDescription(e.getValue());
+            }
         });
 
+      //  company.setItems(List.of("Acme Corporation", "Nova Retail Group", "Skyline Ventures", "Brightpath Inc."));
+    //    company.setValue("Acme Corporation");
+        company.setWidthFull();
+        company.setItemLabelGenerator(CompanyProfileDto::getName);
         TextField senderName = new TextField("Sender Name");
+        EmailField senderEmail = new EmailField("Sender Email");
+        EmailField replyTo = new EmailField("Reply-To Email");
+        company.addValueChangeListener(e -> {
+
+            if(e.getValue() != null) {
+                draft.setCompanyProfile(e.getValue().getName());
+                summary.refresh(draft);
+                emailCampaignDto.setCompanyId(e.getValue().getId());
+                if (e.getValue().getName() != null) {
+                    senderName.setValue(e.getValue().getName());
+                }
+
+                if (e.getValue().getFromEmailSendAddress() != null) {
+                    senderEmail.setValue(e.getValue().getFromEmailSendAddress());
+                }
+            }
+        });
+
+
+        senderName.setReadOnly(true);
         senderName.setPlaceholder("e.g. MailNova Marketing");
         senderName.setWidthFull();
-        senderName.addValueChangeListener(e -> draft.setSenderName(e.getValue()));
+        senderName.addValueChangeListener(e -> {
 
-        EmailField senderEmail = new EmailField("Sender Email");
+            if(e.getValue() != null) {
+                draft.setSenderName(e.getValue());
+
+            }
+        });
+
+        senderEmail.setReadOnly(true);
         senderEmail.setPlaceholder("marketing@acme.com");
         senderEmail.setRequiredIndicatorVisible(true);
         senderEmail.setWidthFull();
         senderEmail.setValueChangeMode(ValueChangeMode.LAZY);
         senderEmail.addValueChangeListener(e -> {
-            draft.setSenderEmail(e.getValue());
-            summary.refresh(draft);
+            if(e.getValue() != null) {
+                draft.setSenderEmail(e.getValue());
+                summary.refresh(draft);
+            }
         });
 
-        EmailField replyTo = new EmailField("Reply-To Email");
+
         replyTo.setPlaceholder("support@acme.com");
         replyTo.setWidthFull();
-        replyTo.addValueChangeListener(e -> draft.setReplyToEmail(e.getValue()));
+        replyTo.addValueChangeListener(e -> {
+            draft.setReplyToEmail(e.getValue());
+        });
 
         TextField tags = new TextField("Campaign Tags");
         tags.setPlaceholder("e.g. sale, seasonal, vip");
         tags.setWidthFull();
         tags.setHelperText("Separate multiple tags with commas");
-        tags.addValueChangeListener(e -> draft.setTags(e.getValue()));
+        tags.addValueChangeListener(e -> {
+            if(e.getValue() != null) {
+                draft.setTags(e.getValue());
+                emailCampaignDto.setTags(e.getValue());
+            }
+        });
 
-        ComboBox<String> campaignType = new ComboBox<>("Campaign Type");
-        campaignType.setItems(List.of("Promotional", "Newsletter", "Transactional", "Announcement", "Re-engagement"));
+        ComboBox<CampaignType> campaignType = new ComboBox<>("Campaign Type");
+        campaignType.setItems(CampaignType.values());
         campaignType.setWidthFull();
-        campaignType.addValueChangeListener(e -> draft.setCampaignType(e.getValue()));
+        campaignType.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                draft.setCampaignType(e.getValue().name());
+            }
+        });
 
         FormLayout form = new FormLayout();
         form.addClassName("mn-form");
@@ -108,5 +169,13 @@ public class DetailsStep extends VerticalLayout {
         form.add(senderEmail, replyTo);
         form.add(tags, campaignType);
         return form;
+    }
+    private void loadData() {
+
+        List<CompanyProfileDto> companyProfilList = this.companyProfileService.getAllCompanyByCreator(userid);
+        if (companyProfilList != null && companyProfilList.size() > 0) {
+            company.setItems(companyProfilList);
+            company.setValue(companyProfilList.get(0));
+        }
     }
 }

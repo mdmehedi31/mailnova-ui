@@ -1,8 +1,8 @@
 package com.mailnova.view.companies;
 
 import com.mailnova.DTO.CompanyProfileDto;
+import com.mailnova.service.CompanyProfileService;
 import com.mailnova.view.MainLayout;
-import com.mailnova.view.service.CompanyProfileService;
 import com.mailnova.view.utils.Utils;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -70,7 +70,7 @@ public class CompanyListView extends VerticalLayout {
         body.add(listContainer, detailContainer);
         add(body);
 
-        List<CompanyProfileDto> companies = companyService.findAll(this.userId);
+        List<CompanyProfileDto> companies = companyService.getAllCompanyByCreator(this.userId);
         buildList(companies);
 
         if (!companies.isEmpty()) {
@@ -237,7 +237,7 @@ public class CompanyListView extends VerticalLayout {
 
     private void selectCompany(CompanyProfileDto company) {
         this.selectedCompany = company;
-        buildList(companyService.findAll(this.userId));
+        buildList(companyService.getAllCompanyByCreator(this.userId));
         renderDetail(company);
     }
 
