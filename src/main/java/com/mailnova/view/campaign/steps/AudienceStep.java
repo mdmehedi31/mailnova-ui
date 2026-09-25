@@ -6,6 +6,7 @@ import com.mailnova.service.CompanyProfileService;
 import com.mailnova.view.campaign.components.SectionHeader;
 import com.mailnova.view.campaign.components.SummaryPanel;
 import com.mailnova.view.campaign.model.CampaignDraft;
+import com.mailnova.view.utils.Utils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
@@ -16,6 +17,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 import java.util.regex.Pattern;
 
@@ -153,7 +157,13 @@ public class AudienceStep extends VerticalLayout {
         list.add(requirement("Max file size: 10MB"));
         list.add(requirement("Supports .xlsx and .xls formats"));
 
-        Anchor download = new Anchor("#", "Download sample file");
+
+        Anchor download = new Anchor(DownloadHandler.fromInputStream(e->
+            new DownloadResponse(Utils.generateEmailCampaignFile(),"mailnova-email-campaign.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",-1)
+        ), "Download sample file");
+
+        download.getElement().setAttribute("download", true);
         download.addClassName("mn-download-link");
         Icon downloadIcon = VaadinIcon.DOWNLOAD.create();
         downloadIcon.addClassName("mn-download-icon");

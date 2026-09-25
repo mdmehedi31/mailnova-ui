@@ -89,7 +89,7 @@ public class ContentStep extends VerticalLayout {
         Button create = new Button("Create New Template", VaadinIcon.PLUS.create());
         create.addClassName("mn-tab-button");
 
-        HorizontalLayout tabs = new HorizontalLayout(existing, create);
+        HorizontalLayout tabs = new HorizontalLayout(existing/*, create*/);
         tabs.addClassName("mn-tabs");
         tabs.setSpacing(true);
         tabs.setWidthFull();

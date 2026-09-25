@@ -11,6 +11,12 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Shared "Campaign Summary" card shown on the right of every wizard step.
  * A single instance is reused across Details / Audience / Content /
@@ -26,6 +32,7 @@ public class SummaryPanel extends VerticalLayout {
     private final Span fromEmailValue = new Span("—");
     private final Span recipientsValue = new Span("—");
     private final Span scheduleValue = new Span("—");
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E, MMM dd, yyyy hh:mm a");
 
     private final VerticalLayout extraSlot = new VerticalLayout();
 
@@ -111,9 +118,31 @@ public class SummaryPanel extends VerticalLayout {
         companyValue.setText(blankToDash(draft.getCompanyProfile()));
         fromEmailValue.setText(blankToDash(draft.getSenderEmail()));
         recipientsValue.setText(0 + " recipients");
-        scheduleValue.setText(draft.getDescription());
+        scheduleValue.setText(getScheduleDate(draft));
     }
 
+
+    public String getScheduleDate(CampaignDraft draft){
+
+        if(draft== null)
+            return "";
+
+        if (draft.getScheduleDate() == null && draft.getScheduleTime() == null)
+            return "";
+
+        LocalDate date = LocalDate.now();
+        LocalTime time =LocalTime.MIDNIGHT;
+
+        if (draft.getScheduleDate() != null) {
+            date = draft.getScheduleDate();
+        }
+
+        if (draft.getScheduleTime() != null) {
+            time = draft.getScheduleTime();
+        }
+        LocalDateTime dateTime=LocalDateTime.of(date, time);
+        return formatter.format(dateTime);
+    }
     private String blankToDash(String value) {
         return (value == null || value.isBlank()) ? "—" : value;
     }

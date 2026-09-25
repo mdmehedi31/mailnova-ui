@@ -14,6 +14,7 @@ import com.mailnova.view.campaign.steps.ContentStep;
 import com.mailnova.view.campaign.steps.DetailsStep;
 import com.mailnova.view.campaign.steps.ScheduleReviewStep;
 import com.mailnova.view.utils.CustomNotification;
+import com.mailnova.view.utils.NotificationType;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -33,7 +34,7 @@ public class CreateCampaignView extends VerticalLayout {
 
     private final CampaignDraft draft = new CampaignDraft();
     private final SummaryPanel summaryPanel = new SummaryPanel();
-    private final EmailCampaignDto emailCampaignDto = new EmailCampaignDto();
+    private  EmailCampaignDto emailCampaignDto = new EmailCampaignDto();
     private final Div wizardSlot = new Div();
     private final Div mainContentSlot = new Div();
     private final EmailCampaignService emailCampaignService;
@@ -146,9 +147,16 @@ public class CreateCampaignView extends VerticalLayout {
                 emailCampaignDto.setCreatedBy(userId);
                 EmailCampaignDto saveResponse= emailCampaignService.createEmailCampaign(emailCampaignDto);
                 if (saveResponse != null) {
-                    Notification.show("Campaign created successfully!", 3000, Notification.Position.TOP_END);
+
+                    if(saveResponse.getMessage() !=null && !saveResponse.getMessage().isBlank()) {
+                        CustomNotification.warning(saveResponse.getMessage(), NotificationType.ERROR.name());
+                    }else {
+                        emailCampaignDto= new EmailCampaignDto();
+                        CustomNotification.success("Campaign created successfully!", NotificationType.SUCCESS.name());
+                    }
                 }else{
-                    Notification.show("Campaign creation failed!", 3000, Notification.Position.TOP_END);
+                    emailCampaignDto= new EmailCampaignDto();
+                    CustomNotification.warning("Campaign creation failed!", NotificationType.ERROR.name());
 
                 }
             } else {
