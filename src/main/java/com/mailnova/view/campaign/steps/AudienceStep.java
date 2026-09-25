@@ -34,6 +34,8 @@ public class AudienceStep extends VerticalLayout {
     private final CampaignDraft draft;
     private final SummaryPanel summary;
     private EmailCampaignDto emailCampaignDto;
+    private Component cmpImportRowView;
+    private Component cmpManualRowView;
     public AudienceStep(CampaignDraft draft, SummaryPanel summary, EmailCampaignDto emailCampaignDto) {
 
         this.emailCampaignDto = emailCampaignDto;
@@ -51,10 +53,15 @@ public class AudienceStep extends VerticalLayout {
                 "Select your recipient list or add recipients manually.",
                 false));
 
+
+        cmpImportRowView = buildImportRow();
+        cmpManualRowView= buildManualEntry();
+        cmpManualRowView.setVisible(false);
+
         add(buildMethodTabs());
-        add(buildImportRow());
-        add(buildDivider("OR"));
-        add(buildManualEntry());
+        add(cmpImportRowView);
+      //  add(buildDivider("OR"));
+        add(cmpManualRowView);
         add(buildTotalRecipients());
 
         summary.setExtra(buildQuickTips());
@@ -67,9 +74,23 @@ public class AudienceStep extends VerticalLayout {
 
         Button manualTab = new Button("Add Manually", VaadinIcon.USER.create());
         manualTab.addClassName("mn-tab-button");
+        manualTab.addClickListener(event -> {
+            importTab.removeClassName("mn-tab-button-active");
+            manualTab.addClassName("mn-tab-button-active");
+            cmpManualRowView.setVisible(true);
+            cmpImportRowView.setVisible(false);
+        });
+
+        importTab.addClickListener(event -> {
+            importTab.addClassName("mn-tab-button-active");
+            manualTab.removeClassName("mn-tab-button-active");
+            cmpManualRowView.setVisible(false);
+            cmpImportRowView.setVisible(true);
+        });
+
 
         HorizontalLayout tabs = new HorizontalLayout(importTab, manualTab);
-        tabs.addClassName("mn-tabs");
+       // tabs.addClassName("mn-tabs");
         tabs.setSpacing(true);
         tabs.setWidthFull();
         return tabs;
@@ -127,7 +148,8 @@ public class AudienceStep extends VerticalLayout {
         UnorderedList list = new UnorderedList();
         list.addClassName("mn-requirements-list");
         list.add(requirement("First row should contain headers"));
-        list.add(requirement("Email column is required"));
+        list.add(requirement("Name should be first column "));
+        list.add(requirement("Email column is required, and it should be second column"));
         list.add(requirement("Max file size: 10MB"));
         list.add(requirement("Supports .xlsx and .xls formats"));
 

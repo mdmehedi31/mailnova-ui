@@ -15,6 +15,8 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -32,6 +34,16 @@ public class DetailsStep extends VerticalLayout {
     private EmailCampaignDto emailCampaignDto;
     private CompanyProfileService companyProfileService;
     private Integer userid=1;
+    TextField campaignName = new TextField("Campaign Name");
+    EmailField senderEmail = new EmailField("Sender Email");
+    TextArea description = new TextArea("Description");
+    EmailField replyTo = new EmailField("Reply-To Email");
+    TextField senderName = new TextField("Sender Name");
+    TextField tags = new TextField("Campaign Tags");
+    ComboBox<CampaignType> campaignType = new ComboBox<>("Campaign Type");
+    List<CompanyProfileDto> companyProfilList=null;
+
+    private static final Logger log = LoggerFactory.getLogger(DetailsStep.class);
     public DetailsStep(CampaignDraft draft, SummaryPanel summary,
                        EmailCampaignDto emailCampaignDto,CompanyProfileService companyProfileService) {
 
@@ -51,12 +63,56 @@ public class DetailsStep extends VerticalLayout {
         add(buildForm(draft, summary));
 
         loadData();
+        setData();
+    }
+
+    private void setData() {
+
+        if(emailCampaignDto !=null){
+
+            if(emailCampaignDto.getName() !=null && !emailCampaignDto.getName().isBlank()){
+                campaignName.setValue(emailCampaignDto.getName());
+            }
+
+            if (emailCampaignDto.getDescription() !=null && !emailCampaignDto.getDescription().isBlank()){
+                description.setValue(emailCampaignDto.getDescription());
+            }
+
+            if (emailCampaignDto.getCompanyId() !=null && companyProfilList != null){
+                CompanyProfileDto companyProfileDto =companyProfilList.stream().filter(e->e.getId().equals(emailCampaignDto.getCompanyId()))
+                        .findAny().orElse(null);
+                if(companyProfileDto !=null){
+                    company.setValue(companyProfileDto);
+
+                    if (companyProfileDto.getName() !=null){
+                        senderName.setValue(companyProfileDto.getName());
+                    }
+
+                    if (companyProfileDto.getFromEmailSendAddress() !=null){
+                        senderEmail.setValue(companyProfileDto.getFromEmailSendAddress());
+                    }
+                }
+            }
+
+            if(emailCampaignDto.getRepliedTo() !=null && !emailCampaignDto.getRepliedTo().isBlank()){
+                replyTo.setValue(emailCampaignDto.getRepliedTo());
+            }
+
+            if (emailCampaignDto.getTags() !=null && !emailCampaignDto.getTags().isBlank()){
+                tags.setValue(emailCampaignDto.getTags());
+            }
+
+            if (emailCampaignDto.getCampaignType() !=null && !emailCampaignDto.getCampaignType().isBlank()){
+
+                log.info("Campaign type value is :: {}, :: {}", emailCampaignDto.getCampaignType(), CampaignType.valueOf(emailCampaignDto.getCampaignType()));
+                campaignType.setValue(CampaignType.valueOf(emailCampaignDto.getCampaignType()));
+            }
+        }
     }
 
 
-
     private FormLayout buildForm(CampaignDraft draft, SummaryPanel summary) {
-        TextField campaignName = new TextField("Campaign Name");
+
         campaignName.setPlaceholder("e.g. Black Friday Sale");
         campaignName.setRequiredIndicatorVisible(true);
         campaignName.setWidthFull();
@@ -69,7 +125,6 @@ public class DetailsStep extends VerticalLayout {
             }
         });
 
-        TextArea description = new TextArea("Description");
         description.setPlaceholder("Promotional email campaign for Black Friday.");
         description.setMaxLength(500);
         description.setWidthFull();
@@ -87,9 +142,7 @@ public class DetailsStep extends VerticalLayout {
     //    company.setValue("Acme Corporation");
         company.setWidthFull();
         company.setItemLabelGenerator(CompanyProfileDto::getName);
-        TextField senderName = new TextField("Sender Name");
-        EmailField senderEmail = new EmailField("Sender Email");
-        EmailField replyTo = new EmailField("Reply-To Email");
+
         company.addValueChangeListener(e -> {
 
             if(e.getValue() != null) {
@@ -106,12 +159,10 @@ public class DetailsStep extends VerticalLayout {
             }
         });
 
-
         senderName.setReadOnly(true);
         senderName.setPlaceholder("e.g. MailNova Marketing");
         senderName.setWidthFull();
         senderName.addValueChangeListener(e -> {
-
             if(e.getValue() != null) {
                 draft.setSenderName(e.getValue());
 
@@ -137,7 +188,6 @@ public class DetailsStep extends VerticalLayout {
             draft.setReplyToEmail(e.getValue());
         });
 
-        TextField tags = new TextField("Campaign Tags");
         tags.setPlaceholder("e.g. sale, seasonal, vip");
         tags.setWidthFull();
         tags.setHelperText("Separate multiple tags with commas");
@@ -148,12 +198,12 @@ public class DetailsStep extends VerticalLayout {
             }
         });
 
-        ComboBox<CampaignType> campaignType = new ComboBox<>("Campaign Type");
         campaignType.setItems(CampaignType.values());
         campaignType.setWidthFull();
         campaignType.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 draft.setCampaignType(e.getValue().name());
+                emailCampaignDto.setCampaignType(e.getValue().name());
             }
         });
 
@@ -171,11 +221,13 @@ public class DetailsStep extends VerticalLayout {
         return form;
     }
     private void loadData() {
-
-        List<CompanyProfileDto> companyProfilList = this.companyProfileService.getAllCompanyByCreator(userid);
+        companyProfilList = this.companyProfileService.getAllCompanyByCreator(userid);
         if (companyProfilList != null && companyProfilList.size() > 0) {
             company.setItems(companyProfilList);
-            company.setValue(companyProfilList.get(0));
+
+            if(emailCampaignDto==null || emailCampaignDto.getCompanyId() == null) {
+                company.setValue(companyProfilList.get(0));
+            }
         }
     }
 }

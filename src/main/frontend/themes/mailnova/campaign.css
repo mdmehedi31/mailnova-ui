@@ -916,6 +916,7 @@ vaadin-date-picker, vaadin-time-picker, vaadin-select {
     border-radius: var(--mn-radius-md);
     padding: 16px 18px;
     gap: 12px;
+    margin-top:5px
 }
 
 .mn-total-icon-badge {

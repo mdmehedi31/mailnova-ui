@@ -2,6 +2,7 @@ package com.mailnova.view.campaign;
 
 import com.mailnova.DTO.EmailCampaignDto;
 import com.mailnova.service.CompanyProfileService;
+import com.mailnova.service.EmailCampaignService;
 import com.mailnova.service.EmailTemplateService;
 import com.mailnova.view.MainLayout;
 import com.mailnova.view.campaign.components.SectionHeader;
@@ -12,6 +13,7 @@ import com.mailnova.view.campaign.steps.AudienceStep;
 import com.mailnova.view.campaign.steps.ContentStep;
 import com.mailnova.view.campaign.steps.DetailsStep;
 import com.mailnova.view.campaign.steps.ScheduleReviewStep;
+import com.mailnova.view.utils.CustomNotification;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -34,6 +36,7 @@ public class CreateCampaignView extends VerticalLayout {
     private final EmailCampaignDto emailCampaignDto = new EmailCampaignDto();
     private final Div wizardSlot = new Div();
     private final Div mainContentSlot = new Div();
+    private final EmailCampaignService emailCampaignService;
     private Component[] stepComponents;
     private  Button backBtn = new Button("Back", VaadinIcon.ARROW_LEFT.create());
     private  Button saveDraftBtn = new Button("Save Draft");
@@ -41,10 +44,11 @@ public class CreateCampaignView extends VerticalLayout {
     private CompanyProfileService companyProfileService;
     private EmailTemplateService emailTemplateService;
     private int currentStep = 1;
-
-    public CreateCampaignView(CompanyProfileService companyProfileService, EmailTemplateService emailTemplateService) {
+    private  Integer userId=1;
+    public CreateCampaignView(CompanyProfileService companyProfileService, EmailTemplateService emailTemplateService, EmailCampaignService emailCampaignService, EmailCampaignService emailCampaignService1) {
         this.companyProfileService = companyProfileService;
         this.emailTemplateService = emailTemplateService;
+        this.emailCampaignService = emailCampaignService1;
 
         addClassName("mn-page");
         setPadding(false);
@@ -137,9 +141,20 @@ public class CreateCampaignView extends VerticalLayout {
         nextBtn.addClassName("mn-btn-primary");
         nextBtn.addClickListener(e -> {
             if (currentStep == WizardStepper.STEP_LABELS.length) {
-                Notification.show("Campaign scheduled successfully!", 3000, Notification.Position.BOTTOM_CENTER);
+
+
+                emailCampaignDto.setCreatedBy(userId);
+                EmailCampaignDto saveResponse= emailCampaignService.createEmailCampaign(emailCampaignDto);
+                if (saveResponse != null) {
+                    Notification.show("Campaign created successfully!", 3000, Notification.Position.TOP_END);
+                }else{
+                    Notification.show("Campaign creation failed!", 3000, Notification.Position.TOP_END);
+
+                }
             } else {
-                goToStep(currentStep + 1);
+                if (isValid()) {
+                    goToStep(currentStep + 1);
+                }
             }
         });
 
@@ -152,6 +167,22 @@ public class CreateCampaignView extends VerticalLayout {
         bar.add(backBtn, spacer, saveDraftBtn, nextBtn/*, scheduleBtn*/);
         bar.setFlexGrow(1, spacer);
         return bar;
+    }
+
+    private boolean isValid() {
+
+        if (currentStep == 1) {
+            if (emailCampaignDto.getName() == null || emailCampaignDto.getName().isBlank()) {
+                CustomNotification.warning("Required Fields Missing", "Email campaign name is missing");
+                return false;
+            }
+
+            if (draft.getSenderEmail() == null || draft.getSenderEmail().isBlank()) {
+                CustomNotification.warning("Required Fields Missing", "Sender email is missing");
+                return false;
+            }
+        }
+        return true;
     }
 
     private void goToStep(int step) {
