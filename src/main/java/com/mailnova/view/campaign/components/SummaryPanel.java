@@ -10,6 +10,8 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Time;
 import java.time.LocalDate;
@@ -34,6 +36,7 @@ public class SummaryPanel extends VerticalLayout {
     private final Span scheduleValue = new Span("—");
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E, MMM dd, yyyy hh:mm a");
 
+    private static final Logger log = LoggerFactory.getLogger(SummaryPanel.class);
     private final VerticalLayout extraSlot = new VerticalLayout();
 
     public SummaryPanel() {
@@ -124,6 +127,8 @@ public class SummaryPanel extends VerticalLayout {
 
     public String getScheduleDate(CampaignDraft draft){
 
+        log.info("Send is now :: {}", draft.isSendNow());
+
         if(draft== null)
             return "";
 
@@ -140,7 +145,16 @@ public class SummaryPanel extends VerticalLayout {
         if (draft.getScheduleTime() != null) {
             time = draft.getScheduleTime();
         }
+
         LocalDateTime dateTime=LocalDateTime.of(date, time);
+
+        if (draft.isSendNow()){
+            dateTime= LocalDateTime.now().plusMinutes(5);
+            log.info("The time is now {}", dateTime);
+        }
+        else {
+            log.info("The Scheduled date time value is :: {}", dateTime);
+        }
         return formatter.format(dateTime);
     }
     private String blankToDash(String value) {

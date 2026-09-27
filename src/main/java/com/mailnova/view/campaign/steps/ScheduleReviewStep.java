@@ -25,15 +25,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Locale;
 
 @Slf4j
 public class ScheduleReviewStep extends VerticalLayout {
 
-    private final Div scheduleFields = new Div();
+  /*  private final Div scheduleFields = new Div();
     private final Div infoBox = new Div();
-    private final Span infoText = new Span();
+    private final Span infoText = new Span();*/
     private final CampaignDraft draft;
     private EmailCampaignDto emailCampaignDto;
     DatePicker date = new DatePicker("Date");
@@ -89,14 +88,11 @@ public class ScheduleReviewStep extends VerticalLayout {
         }
 
         date.setRequiredIndicatorVisible(true);
-        date.setValue(LocalDate.of(2026, 9, 25));
+        date.setValue(LocalDate.now().plusDays(10));
         date.setWidthFull();
-
-
         time.setRequiredIndicatorVisible(true);
         time.setValue(LocalTime.of(16, 0));
         time.setWidthFull();
-
 
         timezone.setItems("America/New_York (EST)", "Asia/Dhaka (GMT+6)", "Europe/London (GMT)",
                 "America/Los_Angeles (PST)", "Asia/Tokyo (JST)");
@@ -114,13 +110,14 @@ public class ScheduleReviewStep extends VerticalLayout {
         Div scheduleNote = new Div();
         scheduleNote.addClassName("mn-schedule-note");
         Icon clock = new Icon(VaadinIcon.CLOCK);
-        Span noteText = new Span("Your campaign will be sent on September 25, 2026 at 4:00 PM (Eastern Time).");
+        Span noteText = new Span();
         noteText.addClassName("mn-schedule-note-text");
         scheduleNote.add(clock, noteText);
         laterFields.add(scheduleNote);
 
         emailCampaignDto.setSendScheduleDate(Instant.now().plus(3, ChronoUnit.MINUTES));
 
+       // draft.setSendNow(true);
         sendChoice.addValueChangeListener(e -> {
 
             log.info("Selected send choice: {}", e.getValue());
@@ -129,12 +126,19 @@ public class ScheduleReviewStep extends VerticalLayout {
                 log.info("Selected send choice for later campaign");
                 laterFields.setVisible(true);
                 draft.setSendNow(false);
+                draft.setScheduleDate(LocalDate.now().plusDays(10));
+                draft.setScheduleTime(LocalTime.of(16, 0));
+                summaryPanel.refresh(draft);
 
             }else{
                 log.info("Selected send choice for now campaign");
                 laterFields.setVisible(false);
                 draft.setSendNow(true);
+                draft.setScheduleDate(LocalDate.now());
+                draft.setScheduleTime(LocalTime.now().plus(5, ChronoUnit.MINUTES));
+                summaryPanel.refresh(draft);
             }
+            buildInfoInformation(draft.getScheduleDate(), draft.getScheduleTime(),draft.getTimezone(),noteText);
         });
 
         Div additional = new Div();
@@ -156,6 +160,7 @@ public class ScheduleReviewStep extends VerticalLayout {
             draft.setScheduleDate(e.getValue());
             summaryPanel.refresh(draft);
             setScheduleData();
+            buildInfoInformation(draft.getScheduleDate(), draft.getScheduleTime(),draft.getTimezone(),noteText);
         });
 
         time.addValueChangeListener(e ->{
@@ -163,11 +168,13 @@ public class ScheduleReviewStep extends VerticalLayout {
             draft.setScheduleTime(e.getValue());
             summaryPanel.refresh(draft);
             setScheduleData();
+            buildInfoInformation(draft.getScheduleDate(), draft.getScheduleTime(),draft.getTimezone(),noteText);
 
         });
         timezone.addValueChangeListener(e ->{
             draft.setTimezone(e.getValue());
                 setScheduleData();
+            buildInfoInformation(draft.getScheduleDate(), draft.getScheduleTime(),draft.getTimezone(),noteText);
         });
         if (sendChoice.getValue()!=null && sendChoice.getValue() == SendChoice.SEND_NO) {
             laterFields.setVisible(false);
@@ -177,14 +184,24 @@ public class ScheduleReviewStep extends VerticalLayout {
         draft.setScheduleDate(date.getValue());
         draft.setScheduleTime(time.getValue());
         draft.setTimezone(timezone.getValue());
-        draft.setSendNow(false);
-
-
-
+        buildInfoInformation(draft.getScheduleDate(), draft.getScheduleTime(),draft.getTimezone(),noteText);
         return panel;
     }
 
+    private void buildInfoInformation(LocalDate localDate, LocalTime localTime, String timeZone, Span scheduleNote) {
 
+        if (date == null || time == null) {
+            scheduleNote.setText("Choose a date and time to schedule your campaign.");
+            return;
+        }
+        String month = localDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        int hour = localTime.getHour() % 12 == 0 ? 12 : localTime.getHour() % 12;
+        String ampm = localTime.getHour() < 12 ? "AM" : "PM";
+        String tzLong = timezone == null ? "" : timeZone.replaceAll("\\s*\\(.*\\)", "");
+        scheduleNote.setText(String.format("Your campaign will be sent on %s %d, %d at %02d:%02d %s (%s Time).",
+                month, localDate.getDayOfMonth(), localDate.getYear(), hour, localTime.getMinute(), ampm, tzLong));
+
+    }
     private void setScheduleData(){
 
         if(date.getValue() != null && time.getValue() != null && timezone.getValue() != null) {
@@ -194,96 +211,7 @@ public class ScheduleReviewStep extends VerticalLayout {
         }
     }
 
-    private Component buildScheduleOptions(CampaignDraft draft, SummaryPanel summary) {
-        H5 title = new H5("Schedule Options");
-        title.addClassName("mn-schedule-title");
-
-        RadioButtonGroup<String> options = new RadioButtonGroup<>();
-        options.setItems("Send Now", "Schedule for Later");
-        options.setValue(draft.isSendNow() ? "Send Now" : "Schedule for Later");
-        options.addClassName("mn-schedule-radio");
-
-
-        date.setRequiredIndicatorVisible(true);
-        date.setValue(LocalDate.now().plusDays(3));
-        date.setWidthFull();
-
-
-        time.setRequiredIndicatorVisible(true);
-        time.setValue(LocalTime.of(16, 0));
-        time.setWidthFull();
-
-        ComboBox<String> timezone = new ComboBox<>("Timezone");
-        timezone.setItems(
-                "America/New_York (EST)",
-                "America/Los_Angeles (PST)",
-                "Asia/Dhaka (BST)",
-                "Europe/London (GMT)",
-                "Asia/Tokyo (JST)"
-        );
-        timezone.setValue("America/New_York (EST)");
-        timezone.setWidthFull();
-
-        scheduleFields.addClassName("mn-schedule-fields");
-        HorizontalLayout dateTimeRow = new HorizontalLayout(date, time);
-        dateTimeRow.addClassName("mn-schedule-datetime-row");
-        dateTimeRow.setWidthFull();
-        VerticalLayout scheduleFieldsContent = new VerticalLayout(dateTimeRow, timezone);
-        scheduleFieldsContent.setPadding(false);
-        scheduleFieldsContent.setSpacing(true);
-        scheduleFields.add(scheduleFieldsContent);
-
-        Icon clock = VaadinIcon.CLOCK.create();
-        clock.addClassName("mn-info-icon");
-        infoText.addClassName("mn-schedule-info-text");
-        HorizontalLayout infoRow = new HorizontalLayout(clock, infoText);
-        infoRow.setAlignItems(Alignment.CENTER);
-        infoRow.setSpacing(true);
-        infoBox.addClassName("mn-schedule-info-box");
-        infoBox.add(infoRow);
-
-        Runnable syncDraft = () -> {
-            boolean sendNow = "Send Now".equals(options.getValue());
-            draft.setSendNow(sendNow);
-            draft.setScheduleDate(date.getValue());
-            draft.setScheduleTime(time.getValue());
-            draft.setTimezone(timezone.getValue());
-            scheduleFields.setVisible(!sendNow);
-            infoBox.setVisible(!sendNow);
-            updateInfoText(date.getValue(), time.getValue(), timezone.getValue());
-            summary.refresh(draft);
-        };
-
-        options.addValueChangeListener(e -> syncDraft.run());
-        date.addValueChangeListener(e -> syncDraft.run());
-        time.addValueChangeListener(e -> syncDraft.run());
-        timezone.addValueChangeListener(e -> syncDraft.run());
-        syncDraft.run();
-
-        VerticalLayout content = new VerticalLayout(title, options, scheduleFields, infoBox);
-        content.addClassName("mn-schedule-content");
-        content.setPadding(false);
-        content.setSpacing(true);
-
-        Div card = new Div(content);
-        card.addClassName("mn-card");
-        card.addClassName("mn-schedule-card");
-        return card;
-    }
-
-    private void updateInfoText(LocalDate date, LocalTime time, String timezone) {
-        if (date == null || time == null) {
-            infoText.setText("Choose a date and time to schedule your campaign.");
-            return;
-        }
-        String month = date.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-        int hour = time.getHour() % 12 == 0 ? 12 : time.getHour() % 12;
-        String ampm = time.getHour() < 12 ? "AM" : "PM";
-        String tzLong = timezone == null ? "" : timezone.replaceAll("\\s*\\(.*\\)", "");
-        infoText.setText(String.format("Your campaign will be sent on %s %d, %d at %02d:%02d %s (%s Time).",
-                month, date.getDayOfMonth(), date.getYear(), hour, time.getMinute(), ampm, tzLong));
-    }
-
+  /*
     private Component buildAdditionalSettings() {
         H5 title = new H5("Additional Settings");
         title.addClassName("mn-schedule-title");
@@ -300,9 +228,9 @@ public class ScheduleReviewStep extends VerticalLayout {
         card.addClassName("mn-card");
         card.addClassName("mn-additional-settings-card");
         return card;
-    }
+    }*/
 
-    private Component toggleRow(String label) {
+   /* private Component toggleRow(String label) {
         Span text = new Span(label);
         text.addClassName("mn-toggle-label");
 
@@ -315,7 +243,7 @@ public class ScheduleReviewStep extends VerticalLayout {
         row.setAlignItems(Alignment.CENTER);
         row.setFlexGrow(1, text);
         return row;
-    }
+    }*/
 
     private Component buildConfirmationBanner() {
         Icon check = VaadinIcon.CHECK_CIRCLE.create();
