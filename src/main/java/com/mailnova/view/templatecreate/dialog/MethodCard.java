@@ -12,14 +12,14 @@ import com.vaadin.flow.component.html.Div;
  */
 public class MethodCard extends Div {
 
-    public MethodCard(TemplateSource source, String title, String description, String hint, Runnable onChoose) {
-        addClassNames("mn-method-card", source == TemplateSource.AI ? "mn-method-ai" : "mn-method-manual");
+    public MethodCard(Boolean isAiBuild, String title, String description, String hint, Runnable onChoose) {
+        addClassNames("mn-method-card", isAiBuild ? "mn-method-ai" : "mn-method-manual");
         getElement().setAttribute("role", "button");
         getElement().setAttribute("tabindex", "0");
         getElement().setAttribute("aria-label", title);
 
-        add(Ui.div("mn-method-top", new SourceBadge(source)),
-            TemplateArt.thumb(source),
+        add(Ui.div("mn-method-top", new SourceBadge(isAiBuild)),
+            TemplateArt.thumb(isAiBuild),
             Ui.span(title, "mn-method-title"),
             Ui.span(description, "mn-method-desc"),
             Ui.span(hint, "mn-method-hint"));

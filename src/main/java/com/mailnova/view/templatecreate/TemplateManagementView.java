@@ -1,5 +1,8 @@
 package com.mailnova.view.templatecreate;
 
+import com.mailnova.DTO.EmailCampaignDto;
+import com.mailnova.DTO.EmailTemplateDto;
+import com.mailnova.DTO.EmailTemplateTypeDTO;
 import com.mailnova.service.TemplateService;
 import com.mailnova.view.MainLayout;
 import com.mailnova.view.campaign.model.*;
@@ -43,7 +46,7 @@ public class TemplateManagementView extends Div implements TemplateActions {
     private TemplateFilter.Collection collection = TemplateFilter.Collection.ALL;
     private Visibility visibility;
     private boolean listMode;
-    private EmailTemplate selected;
+    private EmailTemplateDto selected;
     private boolean syncing;
 
     // widgets
@@ -59,20 +62,21 @@ public class TemplateManagementView extends Div implements TemplateActions {
     private final CollectionsPanel collections;
     private final TemplatePreviewPanel preview;
     private final Div body = Ui.div("mn-body");
-
+    private List<EmailTemplateTypeDTO> templateTypes;
     public TemplateManagementView(TemplateService service) {
         this.service = service;
         addClassName("mn-view");
         collections = new CollectionsPanel(service, this::onCollection);
         preview = new TemplatePreviewPanel(this, this::closePreview);
 
+        templateTypes= service.getEmailTemplateTypes();
         Div center = Ui.div("mn-center", stats, new QuickActions(this::openManual, this::openAi,
                 () -> Notification.show("Import is coming soon"), () -> Notification.show("Public library is coming soon")),
                 Ui.div("mn-browse", collections, Ui.div("mn-main", toolbar(), chipRow(), recentSection(), allSection())));
         body.add(center, preview);
         add(header(), body);
 
-        selected = service.findAll().stream().findFirst().orElse(null);
+        selected =null; //service.findAll().stream().findFirst().orElse(null);
         refresh();
     }
 
@@ -191,7 +195,7 @@ public class TemplateManagementView extends Div implements TemplateActions {
 
     private void refresh() {
         TemplateFilter filter = new TemplateFilter(text, type, subtype, chip, collection, visibility);
-        List<EmailTemplate> results = service.search(filter);
+        List<EmailTemplateDto> results = new ArrayList<>(); //service.search(filter);
 
         stats.removeAll();
         stats.add(new StatCard(VaadinIcon.FILE_TEXT, "green", "Total Templates", String.valueOf(service.findAll().size()), "↑ 12%"),
@@ -205,13 +209,13 @@ public class TemplateManagementView extends Div implements TemplateActions {
         chips.forEach((c, b) -> b.setClassName("mn-chip-active", c == chip));
         collections.refresh();
 
-        recent.removeAll();
+        recent.removeAll();/*
         service.recentlyUsed(4).forEach(t ->
-                recent.add(new TemplateCard(t, TemplateCard.Mode.COMPACT, t.equals(selected), this)));
+                recent.add(new TemplateCard(t, TemplateCard.Mode.COMPACT, t.equals(selected), this)));*/
 
         grid.removeAll();
         grid.setClassName("mn-grid-list", listMode);
-        results.forEach(t -> grid.add(new TemplateCard(t, TemplateCard.Mode.FULL, t.equals(selected), this)));
+        results.forEach(t -> grid.add(new TemplateCard(t,TemplateCard.Mode.FULL, t.equals(selected), this)));
         if (results.isEmpty()) {
             grid.add(Ui.div("mn-empty", Ui.span("No templates match your filters", "mn-empty-title"),
                     Ui.span("Try clearing the search or filters, or create a new template.", "mn-empty-sub")));
@@ -220,7 +224,13 @@ public class TemplateManagementView extends Div implements TemplateActions {
         gridBtn.setClassName("mn-view-active", !listMode);
         listBtn.setClassName("mn-view-active", listMode);
 
-        preview.show(selected != null && service.findAll().contains(selected) ? selected : null);
+        EmailTemplateTypeDTO emailTemplateTypeDTO= null;
+        if (selected != null && selected.getTypeId() != null) {
+            emailTemplateTypeDTO= templateTypes.stream().filter(e->e.getId().equals(selected.getTypeId())).findAny().orElse(null);
+
+        }
+
+        preview.show(selected != null && service.findAll().contains(selected) ? selected : null,emailTemplateTypeDTO);
     }
 
     private void closePreview() {
@@ -235,7 +245,7 @@ public class TemplateManagementView extends Div implements TemplateActions {
 
     private void openAi() { new CreateTemplateDialog(service, this::afterSave).openAi(); }
 
-    private void afterSave(EmailTemplate t) {
+    private void afterSave(EmailTemplateDto t) {
         selected = t;
         body.removeClassName("mn-preview-closed");
         refresh();
@@ -244,44 +254,49 @@ public class TemplateManagementView extends Div implements TemplateActions {
 
     // ------------------------------------------------------------------ TemplateActions
 
-    @Override public void use(EmailTemplate t) {
-        service.markUsed(t);
+    @Override public void use(EmailTemplateDto t) {
+      //  service.markUsed(t);
         refresh();
         Notification.show("\"" + t.getName() + "\" is ready to use in a campaign");
     }
 
-    @Override public void preview(EmailTemplate t) {
+    @Override public void preview(EmailTemplateDto t) {
         selected = t;
         body.removeClassName("mn-preview-closed");
         refresh();
     }
 
-    @Override public void edit(EmailTemplate t) {
+    @Override
+    public void edit(EmailTemplateDto t) {
         new CreateTemplateDialog(service, this::afterSave).openEdit(t);
     }
 
-    @Override public void duplicate(EmailTemplate t) {
+    /*   new CreateTemplateDialog(service, this::afterSave).openEdit(t);
+   }
+*/
+    @Override public void duplicate(EmailTemplateDto t) {
         afterSave(service.duplicate(t));
     }
 
-    @Override public void delete(EmailTemplate t) {
+    @Override public void delete(EmailTemplateDto t) {
         ConfirmDialog d = new ConfirmDialog();
         d.setHeader("Delete template?");
         d.setText("\"" + t.getName() + "\" will be permanently removed.");
         d.setCancelable(true);
         d.setConfirmText("Delete");
         d.setConfirmButtonTheme("error primary");
-        d.addConfirmListener(e -> {
+       /* d.addConfirmListener(e -> {
             service.delete(t);
             if (t.equals(selected)) selected = null;
             refresh();
             Notification.show("Template deleted");
-        });
+        });*/
         d.open();
     }
 
-    @Override public void toggleFavorite(EmailTemplate t) {
-        service.toggleFavorite(t);
+    @Override
+    public void toggleFavorite(EmailTemplateDto t) {
+       // service.toggleFavorite(t);
         refresh();
     }
 }

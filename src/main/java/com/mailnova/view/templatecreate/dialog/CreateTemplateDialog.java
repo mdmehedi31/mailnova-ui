@@ -1,19 +1,21 @@
 package com.mailnova.view.templatecreate.dialog;
 
+import com.mailnova.DTO.EmailTemplateDto;
+import com.mailnova.DTO.EmailTemplateTypeDTO;
 import com.mailnova.service.TemplateService;
-import com.mailnova.view.campaign.model.EmailTemplate;
 import com.mailnova.view.campaign.model.TemplateSource;
-import com.mailnova.view.campaign.model.Visibility;
 import com.mailnova.view.templatecreate.SourceBadge;
 import com.mailnova.view.templatecreate.TemplateArt;
 import com.mailnova.view.templatecreate.Ui;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.dialog.DialogVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -24,16 +26,19 @@ import java.util.function.Consumer;
 public class CreateTemplateDialog extends Dialog {
 
     private final TemplateService service;
-    private final Consumer<com.mailnova.view.campaign.model.EmailTemplate> onSaved;
+    private final Consumer<EmailTemplateDto> onSaved;
     private final DialogShell shell = new DialogShell();
 
     private boolean dirty;
     private AiGenerationPanel wizard;
     private TemplateInformationForm form;
+    private List<EmailTemplateTypeDTO> emailTemplateTypeDTOList;
 
-    public CreateTemplateDialog(TemplateService service, Consumer<com.mailnova.view.campaign.model.EmailTemplate> onSaved) {
+    public CreateTemplateDialog(TemplateService service, Consumer<EmailTemplateDto> onSaved) {
         this.service = service;
         this.onSaved = onSaved;
+
+        emailTemplateTypeDTOList=service.getEmailTemplateTypes();
         addClassName("mn-dialog");
         addThemeVariants(DialogVariant.LUMO_NO_PADDING);
         //setModal(true);
@@ -44,18 +49,19 @@ public class CreateTemplateDialog extends Dialog {
         add(shell);
         // Esc / outside click / X all go through the same "unsaved changes?" check.
         addDialogCloseActionListener(e -> attemptClose());
+
     }
 
     // ------------------------------------------------------------------ entry points
 
     public void openChooser() { showChooser(); open(); }
 
-    public void openManual() { showEditor(null, TemplateSource.MANUAL, this::showChooser, "Create Manual Template"); open(); }
+    public void openManual() { showEditor(null, false, this::showChooser, "Create Manual Template"); open(); }
 
     public void openAi() { showAi(); open(); }
 
-    public void openEdit(EmailTemplate t) {
-        showEditor(t, t.getSource(), this::attemptClose, "Edit Template");
+    public void openEdit(EmailTemplateDto t) {
+        showEditor(t, t.getAiBuild(), this::attemptClose, "Edit Template");
         open();
     }
 
@@ -75,31 +81,35 @@ public class CreateTemplateDialog extends Dialog {
     }
 
     private void onMethodChosen(TemplateSource s) {
-        if (s == TemplateSource.MANUAL) showEditor(null, TemplateSource.MANUAL, this::showChooser, "Create Manual Template");
+        if (s == TemplateSource.MANUAL) showEditor(null, false, this::showChooser, "Create Manual Template");
         else showAi();
     }
 
     /** Manual create, Edit existing, or "Edit" from the AI review — same form, same editor. */
-    private void showEditor(EmailTemplate existing, TemplateSource source, Runnable back, String title) {
+    private void showEditor(EmailTemplateDto existing, boolean isBuildByAI, Runnable back, String title) {
         setWidth("760px");
-        form = new TemplateInformationForm(existing, source, () -> dirty = true);
+        form = new TemplateInformationForm(existing, isBuildByAI, () -> dirty = true,service, emailTemplateTypeDTOList);
         Button backBtn = new Button("Back", Ui.icon(VaadinIcon.ARROW_LEFT, "14px"));
         backBtn.addClassName("mn-back-link");
         backBtn.addClickListener(e -> back.run());
-        Button draft = Ui.ghost("Save Draft");
-        draft.addClickListener(e -> save(form.toTemplate(true)));
+        Button draft = Ui.getErrorButton("Cancel");
+        draft.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR,ButtonVariant.LUMO_SUCCESS);
+        draft.addClickListener(e -> this.close());
         Button save = Ui.primary(existing != null && service.findAll().contains(existing) ? "Save Changes" : "Save Template");
-        save.addClickListener(e -> { if (form.validate()) save(form.toTemplate(false)); });
+        save.addClickListener(e -> {
+            if (form.validate())
+                save(form.toTemplate(false));
+        });
         Div head = Ui.div("mn-dlg-head-row",
-                Ui.div("mn-head-left", backBtn, Ui.span(title, "mn-dlg-title")),
-                Ui.div("mn-head-actions", draft, save));
+                Ui.div("mn-head-left", backBtn, Ui.span(title, "mn-dlg-title")));
+        Div footer= Ui.div("mn-head-actions", draft, save);
         shell.setBodyClass("");
-        shell.set(head, form, null);
+        shell.set( head,form, footer);
     }
 
     private void showAi() {
         dirty = false;
-        wizard = new AiGenerationPanel(service, this::renderAi, () -> dirty = true);
+        wizard = new AiGenerationPanel(service, this::renderAi, () -> dirty = true,emailTemplateTypeDTOList);
         renderAi();
     }
 
@@ -128,23 +138,23 @@ public class CreateTemplateDialog extends Dialog {
             }
             case REVIEW -> {
                 Div head = Ui.div("mn-review-head",
-                        Ui.div("mn-review-top", new SourceBadge(TemplateSource.AI), closeButton()),
+                        Ui.div("mn-review-top", new SourceBadge(true), closeButton()),
                         Ui.div("mn-review-title-row",
                                 Ui.div("mn-review-titles", Ui.span(wizard.getTemplateName(), "mn-review-title"),
-                                        Ui.span(wizard.getType() + "  •  " + wizard.getSubtype(), "mn-tcard-meta")),
+                                        Ui.span(wizard.getType() + "  •  " , "mn-tcard-meta")),
                                 TemplateArt.envelope()));
                 Button use = Ui.primary("Use Template");
                 use.addClassName("mn-use-wide");
-                use.addClickListener(e -> save(wizard.toTemplate(Visibility.PUBLIC)));
+                use.addClickListener(e -> save(wizard.toTemplate()));
                 Button edit = Ui.ghost("Edit");
-                edit.addClickListener(e -> showEditor(wizard.toTemplate(Visibility.PUBLIC), TemplateSource.AI,
+                edit.addClickListener(e -> showEditor(wizard.toTemplate(), true,
                         this::renderAi, "Edit Template"));
                 Button dup = Ui.ghost("Duplicate");
                 dup.addClickListener(e -> {
-                    EmailTemplate c = wizard.toTemplate(Visibility.PUBLIC);
+                    EmailTemplateDto c = wizard.toTemplate();
                     c.setName(c.getName() + " (Copy)");
-                    service.save(c);
-                    onSaved.accept(c);
+                   // service.save(c);
+                   // onSaved.accept(c);
                     Notification.show("Copy saved to your templates");
                 });
                 shell.setBodyClass("mn-review-body");
@@ -161,10 +171,16 @@ public class CreateTemplateDialog extends Dialog {
         return b;
     }
 
-    private void save(EmailTemplate t) {
-        service.save(t);
+    private void save(EmailTemplateDto emailTemplateDto) {
+        /*service.save(t);
         dirty = false;
-        onSaved.accept(t);
+        onSaved.accept(t);*/
+
+        EmailTemplateDto saveResponse= service.createEmailTemplate(emailTemplateDto);
+
+        if (saveResponse != null) {
+            onSaved.accept(saveResponse);
+        }
         close();
     }
 

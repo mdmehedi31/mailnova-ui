@@ -13,10 +13,10 @@ public class CreationMethodSelector extends Div {
 
     public CreationMethodSelector(Consumer<TemplateSource> onChoose) {
         addClassName("mn-method-grid");
-        manual = new MethodCard(TemplateSource.MANUAL, "Create Manually",
+        manual = new MethodCard(false, "Create Manually",
                 "Write the subject and body yourself with the rich text editor.",
                 "Full control over layout and copy", () -> choose(TemplateSource.MANUAL, onChoose));
-        ai = new MethodCard(TemplateSource.AI, "Generate with AI",
+        ai = new MethodCard(true, "Generate with AI",
                 "Pick a type, describe the email and let AI write the first draft.",
                 "You can edit everything afterwards", () -> choose(TemplateSource.AI, onChoose));
         add(manual, ai);

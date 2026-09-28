@@ -1,5 +1,8 @@
 package com.mailnova.service;
 
+import com.mailnova.DTO.EmailTemplateDto;
+import com.mailnova.DTO.EmailTemplateTypeDTO;
+import com.mailnova.endpoint.EmailTemplateTypesCaller;
 import com.mailnova.view.campaign.model.EmailTemplate;
 import com.mailnova.view.campaign.model.TemplateFilter;
 import com.mailnova.view.campaign.model.TemplateSource;
@@ -8,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +25,20 @@ import java.util.function.Predicate;
 @Service
 public class TemplateService {
 
+
+    private final EmailTemplateService emailTemplateService;
+    private EmailTemplateTypesCaller emailTemplateTypesCaller;
+
+    public TemplateService(EmailTemplateTypesCaller emailTemplateTypesCaller, EmailTemplateService emailTemplateService) {
+        this.emailTemplateTypesCaller = emailTemplateTypesCaller;
+        this.emailTemplateService = emailTemplateService;
+    }
+
+
+    public List<EmailTemplateTypeDTO> getEmailTemplateTypes() {
+        return emailTemplateTypesCaller.getEmailTemplates();
+    }
+
     private final List<EmailTemplate> templates = new CopyOnWriteArrayList<>(seed());
 
     public List<EmailTemplate> findAll() { return List.copyOf(templates); }
@@ -33,9 +51,10 @@ public class TemplateService {
         return stream.toList();
     }
 
-    public List<EmailTemplate> recentlyUsed(int n) {
-        return templates.stream().sorted(Comparator.comparing(EmailTemplate::getLastUsedAt).reversed())
-                .limit(n).toList();
+    public List<EmailTemplateDto> recentlyUsed(int n) {
+        /*return templates.stream().sorted(Comparator.comparing(EmailTemplate::getLastUsedAt).reversed())
+                .limit(n).toList();*/
+        return  new ArrayList<>();
     }
 
     public long count(Predicate<EmailTemplate> p) { return templates.stream().filter(p).count(); }
@@ -44,20 +63,21 @@ public class TemplateService {
         return templates.stream().max(Comparator.comparingInt(EmailTemplate::getUses));
     }
 
-    public EmailTemplate save(EmailTemplate t) {
-        if (!templates.contains(t)) templates.add(0, t);
-        return t;
+    public EmailTemplateDto createEmailTemplate(EmailTemplateDto emailTemplateDto) {
+        EmailTemplateDto saveResponse = emailTemplateService.createEmailTemplate(emailTemplateDto);
+        return saveResponse;
     }
 
-    public EmailTemplate duplicate(EmailTemplate t) {
-        EmailTemplate c = t.copy();
-        templates.add(0, c);
-        return c;
+    public EmailTemplateDto duplicate(EmailTemplateDto t) {
+        //EmailTemplateDto c = t.copy();
+        //templates.add(0, c);
+        return t;
     }
 
     public void delete(EmailTemplate t) { templates.remove(t); }
 
-    public void toggleFavorite(EmailTemplate t) { t.setFavorite(!t.isFavorite()); }
+    public void toggleFavorite(EmailTemplate t) {
+        t.setFavorite(!t.isFavorite()); }
 
     public void markUsed(EmailTemplate t) {
         t.setUses(t.getUses() + 1);

@@ -10,9 +10,9 @@ public final class TemplateArt {
     private TemplateArt() { }
 
     /** Mini "document" thumbnail on the right of a card. AI = text lines, Manual = picture + lines. */
-    public static Div thumb(TemplateSource source) {
-        Div t = Ui.div("mn-thumb " + (source == TemplateSource.AI ? "mn-thumb-ai" : "mn-thumb-manual"));
-        if (source == TemplateSource.MANUAL) {
+    public static Div thumb(boolean source) {
+        Div t = Ui.div("mn-thumb " + (source ? "mn-thumb-ai" : "mn-thumb-manual"));
+        if (!source) {
             Div img = Ui.div("mn-thumb-img", Ui.div("mn-thumb-sun"), Ui.div("mn-thumb-hill"));
             t.add(img);
         } else {

@@ -7,9 +7,9 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 
 /** Pill flagging AI Generated vs Manual (the "AI Badge" / "Status Badge" of the spec). */
 public class SourceBadge extends Span {
-    public SourceBadge(TemplateSource source) {
+    public SourceBadge(Boolean isAiBuild) {
         addClassName("mn-badge");
-        if (source == TemplateSource.AI) {
+        if (isAiBuild) {
             addClassName("mn-badge-ai");
             add(Ui.icon(VaadinIcon.MAGIC, "11px"), new Span("AI Generated"));
         } else {

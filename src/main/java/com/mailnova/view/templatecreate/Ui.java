@@ -14,7 +14,7 @@ public final class Ui {
 
     public static Div div(String cls, Component... children) {
         Div d = new Div(children);
-        if (!cls.isBlank()) d.addClassNames(cls.split(" "));
+        if ( cls != null && !cls.isBlank()) d.addClassNames(cls.split(" "));
         return d;
     }
 
@@ -61,6 +61,12 @@ public final class Ui {
     public static Button ghost(String text) {
         Button b = new Button(text);
         b.addClassName("mn-btn-ghost");
+        return b;
+    }
+
+    public static Button getErrorButton(String text) {
+        Button b = new Button(text);
+        b.addClassName("mb-btn-error");
         return b;
     }
 }

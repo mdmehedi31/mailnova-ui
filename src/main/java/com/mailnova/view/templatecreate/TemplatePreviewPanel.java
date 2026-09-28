@@ -1,7 +1,8 @@
 package com.mailnova.view.templatecreate;
 
 
-import com.mailnova.view.campaign.model.EmailTemplate;
+import com.mailnova.DTO.EmailTemplateDto;
+import com.mailnova.DTO.EmailTemplateTypeDTO;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -23,7 +24,7 @@ public class TemplatePreviewPanel extends Div {
         addClassName("mn-preview");
     }
 
-    public void show(EmailTemplate t) {
+    public void show(EmailTemplateDto t, EmailTemplateTypeDTO templateTypeDTO) {
         removeAll();
         setVisible(t != null);
         if (t == null) return;
@@ -32,23 +33,23 @@ public class TemplatePreviewPanel extends Div {
         close.addClickListener(e -> onClose.run());
         Div head = Ui.div("mn-preview-head", Ui.span("Template Preview", "mn-preview-title"), close);
 
-        Button star = Ui.plainIconButton(t.isFavorite() ? VaadinIcon.STAR : VaadinIcon.STAR_O, "Favorite",
-                t.isFavorite() ? "mn-star mn-star-on" : "mn-star");
+        Button star = Ui.plainIconButton(false ? VaadinIcon.STAR : VaadinIcon.STAR_O, "Favorite",
+                false ? "mn-star mn-star-on" : "mn-star");
         star.addClickListener(e -> actions.toggleFavorite(t));
-        Div badgeRow = Ui.div("mn-tcard-top", new SourceBadge(t.getSource()), star);
+        Div badgeRow = Ui.div("mn-tcard-top", new SourceBadge(t.getAiBuild()), star);
 
         Div info = Ui.div("mn-preview-info", badgeRow,
                 Ui.span(t.getName(), "mn-preview-name"),
-                Ui.span(t.getType() + "  •  " + t.getSubtype(), "mn-tcard-meta"));
+                Ui.span(templateTypeDTO.getName() , "mn-tcard-meta"));
 
-        String safe = Jsoup.clean(t.getBody() == null ? "" : t.getBody(), Safelist.relaxed());
-        Div subject = Ui.div("mn-preview-box", Ui.span(t.getSubject() == null ? "" : t.getSubject(), "mn-preview-subject"));
+        String safe = Jsoup.clean(t.getEmailBody() == null ? "" : t.getEmailBody(), Safelist.relaxed());
+        Div subject = Ui.div("mn-preview-box", Ui.span(t.getEmailSubject() == null ? "" : t.getEmailSubject(), "mn-preview-subject"));
         Div content = Ui.div("mn-preview-box mn-preview-content", new Html("<div>" + safe + "</div>"));
 
-        Div tags = Ui.div("mn-preview-tags", Ui.span(t.getType(), "mn-tag mn-tag-type"), Ui.span(t.getSubtype(), "mn-tag mn-tag-sub"));
+        Div tags = Ui.div("mn-preview-tags", Ui.span(templateTypeDTO !=null && templateTypeDTO.getName()!=null ? templateTypeDTO.getName():"", "mn-tag mn-tag-type"));
 
         Div meta = Ui.div("mn-preview-meta",
-                Ui.div("mn-preview-meta-col", Ui.span("Visibility", "mn-field-label"), new VisibilityBadge(t.getVisibility())),
+              /*  Ui.div("mn-preview-meta-col", Ui.span("Visibility", "mn-field-label"), new VisibilityBadge(t.getVisibility())),*/
                 Ui.div("mn-preview-meta-col", Ui.span("Created", "mn-field-label"),
                         Ui.div("mn-chip-stat", Ui.icon(VaadinIcon.CALENDAR, "13px"),
                                 Ui.span(t.getCreatedOn().format(DateTimeFormatter.ofPattern("MMM d, yyyy")), "mn-created"))));

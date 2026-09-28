@@ -1,11 +1,9 @@
 package com.mailnova.view.templatecreate.dialog;
 
 
+import com.mailnova.DTO.EmailTemplateDto;
+import com.mailnova.DTO.EmailTemplateTypeDTO;
 import com.mailnova.service.TemplateService;
-import com.mailnova.view.campaign.model.EmailTemplate;
-import com.mailnova.view.campaign.model.TemplateSource;
-import com.mailnova.view.campaign.model.TemplateTaxonomy;
-import com.mailnova.view.campaign.model.Visibility;
 import com.mailnova.view.templatecreate.Ui;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -16,6 +14,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -31,8 +30,7 @@ public class AiGenerationPanel extends Div {
     private final Runnable onStepChange;
     private final Runnable onDirty;
 
-    private final Select<String> type = new Select<>();
-    private final Select<String> subtype = new Select<>();
+    private final Select<EmailTemplateTypeDTO> type = new Select<>();
     private final TextField name = new TextField("Template Name");
     private final TextField purpose = new TextField("Email purpose");
     private final TextArea instructions = new TextArea("Additional instructions");
@@ -43,27 +41,25 @@ public class AiGenerationPanel extends Div {
     private Step step = Step.TYPE;
     private boolean generating;
     private String error;
-
-    public AiGenerationPanel(TemplateService service, Runnable onStepChange, Runnable onDirty) {
+    private List<EmailTemplateTypeDTO> emailTemplateTypes;
+    public AiGenerationPanel(TemplateService service, Runnable onStepChange, Runnable onDirty,
+                             List<EmailTemplateTypeDTO> emailTemplateTypes) {
         this.service = service;
         this.onStepChange = onStepChange;
         this.onDirty = onDirty;
+        this.emailTemplateTypes = emailTemplateTypes;
+
         addClassName("mn-ai-panel");
         editor = new TemplateContentEditor("Subject", "Email Content", onDirty);
 
-        type.setItems(TemplateTaxonomy.types());
+        type.setItems(emailTemplateTypes);
+        type.setItemLabelGenerator(EmailTemplateTypeDTO::getName);
         type.setWidthFull();
         type.addClassName("mn-input");
-        subtype.setWidthFull();
-        subtype.addClassName("mn-input");
-        type.addValueChangeListener(e -> {
-            subtype.setItems(TemplateTaxonomy.subtypesOf(e.getValue()));
-            subtype.setValue(TemplateTaxonomy.subtypesOf(e.getValue()).get(0));
-            onDirty.run();
-        });
-        type.setValue(TemplateTaxonomy.types().get(0));
 
-        for (var f : new com.vaadin.flow.component.Component[]{name, purpose, instructions}) f.getElement().getClassList().add("mn-input");
+        for (var f : new com.vaadin.flow.component.Component[]{name, purpose, instructions})
+            f.getElement().getClassList().add("mn-input");
+
         name.setWidthFull();
         name.setPlaceholder("e.g., Interview Invitation");
         name.setRequiredIndicatorVisible(true);
@@ -82,8 +78,7 @@ public class AiGenerationPanel extends Div {
     public Step getStep() { return step; }
     public boolean isGenerating() { return generating; }
     public String getTemplateName() { return name.getValue() == null || name.getValue().isBlank() ? "Untitled Template" : name.getValue(); }
-    public String getType() { return type.getValue(); }
-    public String getSubtype() { return subtype.getValue(); }
+    public Integer getType() { return type.getValue().getId(); }
 
     /** Advances one step; from DESCRIBE it validates and starts generation. */
     public void next() {
@@ -110,9 +105,10 @@ public class AiGenerationPanel extends Div {
         error = null;
         setStep(Step.LOADING);
         UI ui = UI.getCurrent();
-        String t = type.getValue(), s = subtype.getValue(), n = name.getValue(),
+        Integer typeId = type.getValue().getId();
+        String n = name.getValue(),
                 p = purpose.getValue(), i = instructions.getValue();
-        CompletableFuture.supplyAsync(() -> {
+      /*  CompletableFuture.supplyAsync(() -> {
             try { Thread.sleep(1400); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
             return service.generate(t, s, n, p, i);
         }).whenComplete((draft, ex) -> ui.access(() -> {
@@ -125,7 +121,7 @@ public class AiGenerationPanel extends Div {
                 editor.setBodyHtml(draft.body());
                 setStep(Step.REVIEW);
             }
-        }));
+        }));*/
     }
 
     private void setStep(Step s) {
@@ -150,8 +146,7 @@ public class AiGenerationPanel extends Div {
         }
         switch (step) {
             case TYPE -> stepBody.add(hero("What type of template do you need?"),
-                    Ui.div("mn-ai-fields", Ui.div("mn-field", Ui.span("Type", "mn-field-label"), type),
-                            Ui.div("mn-field", Ui.span("Subtype", "mn-field-label"), subtype)));
+                    Ui.div("mn-ai-fields", Ui.div("mn-field", Ui.span("Type", "mn-field-label"), type)));
             case DESCRIBE -> {
                 stepBody.add(hero("Describe what this email should say"));
                 if (error != null) stepBody.add(Ui.div("mn-error", Ui.icon(VaadinIcon.WARNING, "14px"), Ui.span(error, "")));
@@ -175,8 +170,16 @@ public class AiGenerationPanel extends Div {
     }
 
     /** Current draft as a template (source = AI), ready to save or to open in the manual editor. */
-    public EmailTemplate toTemplate(Visibility visibility) {
-        return new EmailTemplate(getTemplateName(), type.getValue(), subtype.getValue(),
-                editor.getSubject(), editor.getBodyHtml(), TemplateSource.AI, visibility);
+    public EmailTemplateDto toTemplate() {
+
+        EmailTemplateDto template = new EmailTemplateDto();
+        template.setName(getTemplateName());
+        template.setTypeId(type.getValue()!=null ? type.getValue().getId() : null);
+        template.setEmailSubject(editor.getSubject());
+        template.setEmailBody(editor.getBodyHtml());
+        template.setAiBuild(true);
+        template.setPublic(true);
+
+        return template;
     }
 }

@@ -1,6 +1,8 @@
 package com.mailnova.view.templatecreate;
 
 
+import com.mailnova.DTO.EmailTemplateDto;
+import com.mailnova.DTO.EmailTemplateTypeDTO;
 import com.mailnova.service.RelativeTime;
 import com.mailnova.view.campaign.model.EmailTemplate;
 import com.vaadin.flow.component.button.Button;
@@ -17,7 +19,9 @@ public class TemplateCard extends Div {
 
     public enum Mode { FULL, COMPACT }
 
-    public TemplateCard(EmailTemplate t, Mode mode, boolean selected, TemplateActions actions) {
+    public TemplateCard(EmailTemplateDto t, Mode mode,
+                        boolean selected,
+                        TemplateActions actions) {
         addClassNames("mn-tcard", mode == Mode.FULL ? "mn-tcard-full" : "mn-tcard-compact");
         if (selected) addClassName("mn-tcard-selected");
 
@@ -25,43 +29,43 @@ public class TemplateCard extends Div {
         getElement().addEventListener("click", e -> actions.preview(t))
                 .setFilter("!event.target.closest('vaadin-button, vaadin-context-menu-item, vaadin-context-menu-overlay')");
 
-        Button star = Ui.plainIconButton(t.isFavorite() ? VaadinIcon.STAR : VaadinIcon.STAR_O, "Favorite",
-                t.isFavorite() ? "mn-star mn-star-on" : "mn-star");
+        Button star = Ui.plainIconButton(false ? VaadinIcon.STAR : VaadinIcon.STAR_O, "Favorite",
+                false ? "mn-star mn-star-on" : "mn-star");
         star.addClickListener(e -> actions.toggleFavorite(t));
 
-        Div top = Ui.div("mn-tcard-top", new SourceBadge(t.getSource()));
+        Div top = Ui.div("mn-tcard-top", new SourceBadge(t.getAiBuild()));
         Div preview = Ui.div("mn-tcard-preview");
-        t.previewLines().forEach(line -> preview.add(new Div(line)));
+        //t.previewLines().forEach(line -> preview.add(new Div(line)));
 
         if (mode == Mode.FULL) {
             top.add(star);
-            add(top, TemplateArt.thumb(t.getSource()),
+            add(top, TemplateArt.thumb(t.getAiBuild()),
                 Ui.span(t.getName(), "mn-tcard-title"),
-                Ui.span(t.getType() + "  •  " + t.getSubtype(), "mn-tcard-meta"),
+                //Ui.span(t.getType() + "  •  " + t.getSubtype(), "mn-tcard-meta"),
                 preview, stats(t, true), actionRow(t, actions));
         } else {
             top.add(moreMenu(t, actions));
             Div foot = Ui.div("mn-tcard-foot", statsInline(t), star);
             add(top, Ui.span(t.getName(), "mn-tcard-title"),
-                Ui.span(t.getType() + "  •  " + t.getSubtype(), "mn-tcard-meta"), preview, foot);
+                Ui.span(t.getType() !=null? t.getType() :"", "mn-tcard-meta"), preview, foot);
         }
     }
 
-    private Div stats(EmailTemplate t, boolean withVisibility) {
+    private Div stats(EmailTemplateDto t, boolean withVisibility) {
         Div row = Ui.div("mn-tcard-stats");
-        if (withVisibility) row.add(new VisibilityBadge(t.getVisibility()));
+       // if (withVisibility) row.add(new VisibilityBadge(t.getVisibility()));
         row.add(statsInline(t));
-        if (t.isDraft()) row.add(Ui.span("Draft", "mn-draft"));
+        if (false) row.add(Ui.span("Draft", "mn-draft"));
         return row;
     }
 
-    private Div statsInline(EmailTemplate t) {
+    private Div statsInline(EmailTemplateDto t) {
         return Ui.div("mn-stat-inline",
-                Ui.div("mn-chip-stat", Ui.icon(VaadinIcon.EYE, "13px"), new Span(t.getUses() + " uses")),
+                Ui.div("mn-chip-stat", Ui.icon(VaadinIcon.EYE, "13px"), new Span(t.getTotalUses() + " uses")),
                 Ui.div("mn-chip-stat", Ui.icon(VaadinIcon.CLOCK, "13px"), new Span(RelativeTime.format(t.getLastUsedAt()))));
     }
 
-    private Div actionRow(EmailTemplate t, TemplateActions a) {
+    private Div actionRow(EmailTemplateDto t, TemplateActions a) {
         Button use = Ui.primary("Use Template");
         use.addClassName("mn-use-btn");
         use.addClickListener(e -> a.use(t));
@@ -74,7 +78,7 @@ public class TemplateCard extends Div {
         return Ui.div("mn-tcard-actions", use, eye, edit, copy, moreMenu(t, a));
     }
 
-    private Button moreMenu(EmailTemplate t, TemplateActions a) {
+    private Button moreMenu(EmailTemplateDto t, TemplateActions a) {
         Button more = Ui.plainIconButton(VaadinIcon.ELLIPSIS_DOTS_V, "More", "mn-more");
         ContextMenu menu = new ContextMenu(more);
         menu.setOpenOnClick(true);
