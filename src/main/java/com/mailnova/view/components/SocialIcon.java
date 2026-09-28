@@ -1,4 +1,4 @@
-package com.mailnova.view.campaign.components;
+package com.mailnova.view.components;
 
 
 import com.vaadin.flow.component.icon.SvgIcon;

@@ -2,8 +2,8 @@ package com.mailnova.view.campaign.steps;
 
 import com.mailnova.DTO.EmailCampaignDto;
 import com.mailnova.enums.SendChoice;
-import com.mailnova.view.campaign.components.SectionHeader;
-import com.mailnova.view.campaign.components.SummaryPanel;
+import com.mailnova.view.components.SectionHeader;
+import com.mailnova.view.components.SummaryPanel;
 import com.mailnova.view.campaign.model.CampaignDraft;
 import com.mailnova.view.utils.Utils;
 import com.vaadin.flow.component.Component;

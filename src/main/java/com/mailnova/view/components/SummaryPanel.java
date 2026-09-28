@@ -1,4 +1,4 @@
-package com.mailnova.view.campaign.components;
+package com.mailnova.view.components;
 
 
 import com.mailnova.view.campaign.model.CampaignDraft;
@@ -13,7 +13,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
