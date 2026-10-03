@@ -190,6 +190,21 @@ public class CreateCampaignView extends VerticalLayout {
                 return false;
             }
         }
+
+        if (currentStep==2){
+            if (emailCampaignDto.getEmailCampaignRecipientDto()== null){
+                CustomNotification.warning("Required Data Missing", "Email campaign recipient is missing");
+                return false;
+            }
+
+            if ((emailCampaignDto.getEmailCampaignRecipientDto().getAttachment() == null ||
+                    emailCampaignDto.getEmailCampaignRecipientDto().getAttachment().getSize()==0) &&
+                    (emailCampaignDto.getEmailCampaignRecipientDto().getEmailRecipients()== null ||
+                            emailCampaignDto.getEmailCampaignRecipientDto().getEmailRecipients().size()==0)){
+                CustomNotification.warning("Required Data Missing", "Email campaign recipient is missing");
+                return false;
+            }
+        }
         return true;
     }
 

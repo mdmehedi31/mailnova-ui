@@ -2,6 +2,7 @@ package com.mailnova.view.campaign.steps;
 
 
 import com.mailnova.DTO.EmailCampaignDto;
+import com.mailnova.DTO.EmailCampaignRecipientDto;
 import com.mailnova.view.components.SectionHeader;
 import com.mailnova.view.components.SummaryPanel;
 import com.mailnova.view.campaign.model.CampaignDraft;
@@ -18,6 +19,12 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.InMemoryUploadHandler;
+import com.vaadin.flow.server.streams.UploadHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.regex.Pattern;
 
@@ -38,6 +45,9 @@ public class AudienceStep extends VerticalLayout {
     private EmailCampaignDto emailCampaignDto;
     private Component cmpImportRowView;
     private Component cmpManualRowView;
+
+    private static  final Logger log = LoggerFactory.getLogger(AudienceStep.class);
+
     public AudienceStep(CampaignDraft draft, SummaryPanel summary, EmailCampaignDto emailCampaignDto) {
 
         this.emailCampaignDto = emailCampaignDto;
@@ -118,19 +128,30 @@ public class AudienceStep extends VerticalLayout {
         H4 title = new H4("Drag & drop your Excel file here");
         title.addClassName("mn-upload-title");
 
-        Span hint = new Span("Supports .xlsx and .xls files (max 10MB)");
+        Span hint = new Span("Supports .csv files (max 100MB)");
         hint.addClassName("mn-upload-hint");
 
       //  Upload buffer = new MemoryBuffer();
-        Upload upload = new Upload();
-        upload.setAcceptedFileTypes(".xlsx", ".xls", ".csv");
+
+        InMemoryUploadHandler inMemoryUploadHandler = UploadHandler.inMemory(((uploadMetadata, bytes) ->{
+
+            String contentType = uploadMetadata.contentType();
+            String fileName= uploadMetadata.fileName();
+
+            log.info("Content-Type: " + contentType+" fileName: " + fileName);
+            MultipartFile file = new MockMultipartFile("file", contentType, fileName, bytes);
+            EmailCampaignRecipientDto recipientDto = new EmailCampaignRecipientDto();
+            recipientDto.setAttachment(file);
+            emailCampaignDto.setEmailCampaignRecipientDto(recipientDto);
+        }));
+
+        Upload upload = new Upload(inMemoryUploadHandler);
+        upload.setAcceptedFileTypes(".csv");
         upload.setMaxFiles(1);
         upload.setDropAllowed(true);
         upload.setUploadButton(new Button("Choose File"));
         upload.addClassName("mn-upload-widget");
         upload.getElement().setAttribute("aria-label", "Choose File");
-
-      //  upload.addSucceededListener(e -> simulateParsedImport());
 
         VerticalLayout content = new VerticalLayout(cloud, title, hint, upload);
         content.addClassName("mn-upload-content");
@@ -150,15 +171,16 @@ public class AudienceStep extends VerticalLayout {
         UnorderedList list = new UnorderedList();
         list.addClassName("mn-requirements-list");
         list.add(requirement("First row should contain headers"));
-        list.add(requirement("Name should be first column "));
+        list.add(requirement("Name should be first column"));
         list.add(requirement("Email column is required, and it should be second column"));
-        list.add(requirement("Max file size: 10MB"));
-        list.add(requirement("Supports .xlsx and .xls formats"));
+        list.add(requirement("Max file size: 100MB"));
+        list.add(requirement("Supports .csv formats"));
 
 
         Anchor download = new Anchor(DownloadHandler.fromInputStream(e->
-            new DownloadResponse(Utils.generateEmailCampaignFile(),"mailnova-email-campaign.xlsx",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",-1)
+            new DownloadResponse(Utils.generateEmailCampaignFile(),"mailnova-email-campaign.csv",
+                    "text/csv",
+                    -1)
         ), "Download sample file");
 
         download.getElement().setAttribute("download", true);
