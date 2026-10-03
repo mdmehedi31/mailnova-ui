@@ -18,11 +18,6 @@ public class EmailTemplateService {
         this.emailTemplateCaller = emailTemplateCaller;
     }
 
-    public List<EmailTemplateDto> getEmailTemplatesByUser(Integer userId) {
-        List<EmailTemplateDto> emailTemplateDtos = new ArrayList<>();
-        return emailTemplateDtos;
-    }
-
 
     public EmailTemplateDto createEmailTemplate(EmailTemplateDto emailTemplateDto) {
         EmailTemplateDto emailTemplate =emailTemplateCaller.createTemplate(emailTemplateDto);

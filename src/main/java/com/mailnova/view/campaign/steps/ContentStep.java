@@ -74,7 +74,7 @@ public class ContentStep extends VerticalLayout {
     }
 
     private void loadEmailTemplates() {
-        List<EmailTemplateDto> emailTemplateList= emailTemplateService.getEmailTemplatesByUser(userId);
+        List<EmailTemplateDto> emailTemplateList= emailTemplateService.getAllEmailTemplates(userId);
         if (emailTemplateList!=null && emailTemplateList.size()>0) {
             template.setItems(emailTemplateList);
             template.setValue(emailTemplateList.get(0));
@@ -107,7 +107,7 @@ public class ContentStep extends VerticalLayout {
                 emailCampaignDto.setEmailTemplateId(e.getValue().getId());
             }
         });
-
+        template.setItemLabelGenerator(EmailTemplateDto::getName);
         TextField subject = new TextField("Email Subject");
         subject.setReadOnly(true);
         subject.setPlaceholder("Don't miss our Black Friday deals!");
