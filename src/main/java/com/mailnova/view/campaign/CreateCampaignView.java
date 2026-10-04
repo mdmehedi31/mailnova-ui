@@ -1,6 +1,7 @@
 package com.mailnova.view.campaign;
 
 import com.mailnova.DTO.EmailCampaignDto;
+import com.mailnova.enums.Response;
 import com.mailnova.service.CompanyProfileService;
 import com.mailnova.service.EmailCampaignService;
 import com.mailnova.service.EmailTemplateService;
@@ -13,9 +14,11 @@ import com.mailnova.view.campaign.steps.AudienceStep;
 import com.mailnova.view.campaign.steps.ContentStep;
 import com.mailnova.view.campaign.steps.DetailsStep;
 import com.mailnova.view.campaign.steps.ScheduleReviewStep;
+import com.mailnova.view.dashboard.DashboardView;
 import com.mailnova.view.utils.CustomNotification;
 import com.mailnova.view.utils.NotificationType;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
@@ -27,6 +30,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 @Route(value = "campaigns/create", layout = MainLayout.class)
 @PageTitle("Create Email Campaign | MailNova")
@@ -46,6 +52,10 @@ public class CreateCampaignView extends VerticalLayout {
     private EmailTemplateService emailTemplateService;
     private int currentStep = 1;
     private  Integer userId=1;
+    private AudienceStep audienceStep;
+
+    private static  final Logger log = LoggerFactory.getLogger(CreateCampaignView.class);
+
     public CreateCampaignView(CompanyProfileService companyProfileService, EmailTemplateService emailTemplateService, EmailCampaignService emailCampaignService, EmailCampaignService emailCampaignService1) {
         this.companyProfileService = companyProfileService;
         this.emailTemplateService = emailTemplateService;
@@ -145,14 +155,26 @@ public class CreateCampaignView extends VerticalLayout {
 
 
                 emailCampaignDto.setCreatedBy(userId);
-                EmailCampaignDto saveResponse= emailCampaignService.createEmailCampaign(emailCampaignDto);
-                if (saveResponse != null) {
+                MultipartFile file= null;
 
-                    if(saveResponse.getMessage() !=null && !saveResponse.getMessage().isBlank()) {
-                        CustomNotification.warning(saveResponse.getMessage(), NotificationType.ERROR.name());
-                    }else {
-                        emailCampaignDto= new EmailCampaignDto();
-                        CustomNotification.success("Campaign created successfully!", NotificationType.SUCCESS.name());
+                if (audienceStep != null) {
+                    file=audienceStep.getFile();
+                }
+                EmailCampaignDto saveResponse= emailCampaignService.createEmailCampaign(emailCampaignDto,file);
+                if (saveResponse != null) {
+                    log.info("Response message is : "+saveResponse.getMessage());
+                    if(saveResponse.getMessage() !=null) {
+                        if(saveResponse.getMessage().equalsIgnoreCase(Response.SUCCESS.name())) {
+                            emailCampaignDto = new EmailCampaignDto();
+                            CustomNotification.success("Campaign created successfully!", NotificationType.SUCCESS.name());
+
+                            UI.getCurrent().navigate(DashboardView.class);
+                        }
+                        else if (saveResponse.getMessage().equalsIgnoreCase(Response.FAILED.name())) {
+                            CustomNotification.warning(saveResponse.getMessage(), NotificationType.ERROR.name());
+                        }else{
+                            CustomNotification.warning(saveResponse.getMessage(), NotificationType.ERROR.name());
+                        }
                     }
                 }else{
                     emailCampaignDto= new EmailCampaignDto();
@@ -191,19 +213,19 @@ public class CreateCampaignView extends VerticalLayout {
             }
         }
 
-        if (currentStep==2){
-            if (emailCampaignDto.getEmailCampaignRecipientDto()== null){
+        if (currentStep==2 && audienceStep != null) {
+            if (audienceStep.getFile()== null){
                 CustomNotification.warning("Required Data Missing", "Email campaign recipient is missing");
                 return false;
             }
 
-            if ((emailCampaignDto.getEmailCampaignRecipientDto().getAttachment() == null ||
+           /* if ((emailCampaignDto.getEmailCampaignRecipientDto().getAttachment() == null ||
                     emailCampaignDto.getEmailCampaignRecipientDto().getAttachment().getSize()==0) &&
                     (emailCampaignDto.getEmailCampaignRecipientDto().getEmailRecipients()== null ||
                             emailCampaignDto.getEmailCampaignRecipientDto().getEmailRecipients().size()==0)){
                 CustomNotification.warning("Required Data Missing", "Email campaign recipient is missing");
                 return false;
-            }
+            }*/
         }
         return true;
     }
@@ -220,10 +242,11 @@ public class CreateCampaignView extends VerticalLayout {
         wizardSlot.removeAll();
         wizardSlot.add(new WizardStepper(currentStep));
 
+
         mainContentSlot.removeAll();
         mainContentSlot.add(switch (currentStep) {
             case 1 -> new DetailsStep(draft, summaryPanel, emailCampaignDto, companyProfileService);
-            case 2 -> new AudienceStep(draft, summaryPanel,emailCampaignDto);
+            case 2 -> audienceStep= new AudienceStep(draft, summaryPanel,emailCampaignDto);
             case 3 -> new ContentStep(draft, summaryPanel,emailCampaignDto,emailTemplateService,companyProfileService);
             default -> new ScheduleReviewStep(draft, summaryPanel,emailCampaignDto);
         });

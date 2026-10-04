@@ -45,7 +45,7 @@ public class AudienceStep extends VerticalLayout {
     private EmailCampaignDto emailCampaignDto;
     private Component cmpImportRowView;
     private Component cmpManualRowView;
-
+    private MultipartFile file= null;
     private static  final Logger log = LoggerFactory.getLogger(AudienceStep.class);
 
     public AudienceStep(CampaignDraft draft, SummaryPanel summary, EmailCampaignDto emailCampaignDto) {
@@ -139,10 +139,9 @@ public class AudienceStep extends VerticalLayout {
             String fileName= uploadMetadata.fileName();
 
             log.info("Content-Type: " + contentType+" fileName: " + fileName);
-            MultipartFile file = new MockMultipartFile("file", contentType, fileName, bytes);
+             file = new MockMultipartFile("file", contentType, fileName, bytes);
             EmailCampaignRecipientDto recipientDto = new EmailCampaignRecipientDto();
             recipientDto.setAttachment(file);
-            emailCampaignDto.setEmailCampaignRecipientDto(recipientDto);
         }));
 
         Upload upload = new Upload(inMemoryUploadHandler);
@@ -345,5 +344,9 @@ public class AudienceStep extends VerticalLayout {
     private void refreshCounts() {
         totalRecipientsValue.setText(draft.getTotalRows() + " recipients");
         summary.refresh(draft);
+    }
+
+    public MultipartFile getFile(){
+        return file;
     }
 }

@@ -5,6 +5,7 @@ import com.mailnova.DTO.EmailCampaignDto;
 import com.mailnova.endpoint.EmailCampaignCaller;
 import com.mailnova.exceptionmessage.ApiResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class EmailCampaignService {
@@ -15,8 +16,8 @@ public class EmailCampaignService {
         this.emailCampaignCaller = emailCampaignCaller;
     }
 
-    public EmailCampaignDto createEmailCampaign(EmailCampaignDto emailCampaignDto) {
-        return emailCampaignCaller.createEmailCampaign(emailCampaignDto);
+    public EmailCampaignDto createEmailCampaign(EmailCampaignDto emailCampaignDto, MultipartFile file) {
+        return emailCampaignCaller.createEmailCampaign(emailCampaignDto, file);
     }
 
     public EmailCampaignDto updateEmailCampaign(EmailCampaignDto emailCampaignDto) {

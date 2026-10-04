@@ -23,9 +23,12 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 @Slf4j
 public class ScheduleReviewStep extends VerticalLayout {
@@ -94,9 +97,12 @@ public class ScheduleReviewStep extends VerticalLayout {
         time.setValue(LocalTime.of(16, 0));
         time.setWidthFull();
 
-        timezone.setItems("America/New_York (EST)", "Asia/Dhaka (GMT+6)", "Europe/London (GMT)",
-                "America/Los_Angeles (PST)", "Asia/Tokyo (JST)");
-        timezone.setValue("America/New_York (EST)");
+        /*timezone.setItems("America/New_York (EST)", "Asia/Dhaka (GMT+6)", "Europe/London (GMT)",
+                "America/Los_Angeles (PST)", "Asia/Tokyo (JST)");*/
+        List<String> timeZones =getTimeZones();
+
+        timezone.setItems(timeZones);
+        timezone.setValue(timeZones.get(0));
         timezone.setWidthFull();
         timezone.addClassName("mn-timezone-select");
 
@@ -184,8 +190,20 @@ public class ScheduleReviewStep extends VerticalLayout {
         draft.setScheduleDate(date.getValue());
         draft.setScheduleTime(time.getValue());
         draft.setTimezone(timezone.getValue());
-        buildInfoInformation(draft.getScheduleDate(), draft.getScheduleTime(),draft.getTimezone(),noteText);
+        buildInfoInformation(draft.getScheduleDate(), draft.getScheduleTime(),timezone.getValue(),noteText);
         return panel;
+    }
+
+    public List<String> getTimeZones(){
+
+        List<String> zones = ZoneId.getAvailableZoneIds()
+                .stream()
+                .filter(id -> id.contains("/"))
+                .filter(id -> !id.startsWith("Etc/"))
+                .filter(id -> !id.startsWith("SystemV/"))
+                .sorted()
+                .toList();
+        return zones;
     }
 
     private void buildInfoInformation(LocalDate localDate, LocalTime localTime, String timeZone, Span scheduleNote) {
@@ -208,7 +226,10 @@ public class ScheduleReviewStep extends VerticalLayout {
 
             Instant scheduleDate = Utils.buildEmailScheduleTime(date.getValue(),time.getValue(),timezone.getValue());
             emailCampaignDto.setSendScheduleDate(scheduleDate);
+            emailCampaignDto.setTimezone(timezone.getValue());
         }
+
+
     }
 
   /*
