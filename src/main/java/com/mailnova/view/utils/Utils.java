@@ -33,10 +33,13 @@ public class Utils {
 
     public static Instant buildEmailScheduleTime(LocalDate date,LocalTime time, String timeZone){
         ZoneId zone = ZoneId.of(timeZone);
-        ZonedDateTime zoned =
-                ZonedDateTime.of(date, time, zone);
+        LocalDateTime dateTime = LocalDateTime.of(
+               date, time
+        );
+        Instant instant = dateTime
+                .atZone(zone)
+                .toInstant();
 
-        Instant instant = zoned.toInstant();
         return instant;
     }
 
